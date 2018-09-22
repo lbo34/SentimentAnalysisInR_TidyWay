@@ -1,0 +1,14 @@
+---
+title: "Sentiment Analysis in R: The Tidy Way"
+subtitle: "DataCamp course by Julia Silge"
+author: "Laurent Barcelo"
+date: "September, 22, 2018"
+output: 
+  html_notebook:
+    toc: TRUE
+    toc_depth: 2
+---
+
+# 1st Segment - Tweets across the United States
+
+
