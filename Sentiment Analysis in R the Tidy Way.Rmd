@@ -9,6 +9,67 @@ output:
     toc_depth: 2
 ---
 
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(eval = F)
+```
+
 # 1st Segment - Tweets across the United States
+
+## Sentiment lexicons
+
+There are several different **sentiment lexicons** available for sentiment analysis. You will explore three in this course that are available in the `tidytext` package:
+
+* `afinn` from Finn Årup Nielsen,
+* `bing` from Bing Liu and collaborators, and
+* `nrc` from Saif Mohammad and Peter Turney.
+
+You will see how these lexicons can be used as you work through this course. The decision about which lexicon to use often depends on what question you are trying to answer.
+In this exercise, you will use `dplyr`'s `count()` function. If you pass `count()` a variable, it will count the number of rows that share each distinct value of that variable.
+
+#### Instructions
+* Load the `dplyr` and `tidytext` packages.
+* Add an argument to `get_sentiments()` to see what the `"bing"` lexicon looks like.
+* Then call `get_sentiments()` for the `"nrc"` lexicon.
+* Add an argument to `count()` so you can see how many words the `nrc` lexicon has for each sentiment category.
+
+```{r}
+library(dplyr)
+library(tidytext)
+
+get_sentiments("bing")
+get_sentiments("nrc")
+
+get_sentiments("nrc") %>% 
+  group_by(sentiment) %>% 
+  count()
+
+get_sentiments("nrc") %>% count(sentiment)
+
+```
+
+## Implement an inner join
+
+In this exercise you will implement sentiment analysis using an inner join. The `inner_join()` function from dplyr will identify which words are in both the sentiment lexicon and the text dataset you are examining. To learn more about joining data frames using dplyr, check out Joining Data in R with `dplyr`.
+
+The `geocoded_tweets` dataset is taken from Quartz and contains three columns:
+
+* `state`, a state in the United States
+* `word`, a word used in tweets posted on Twitter
+* `freq`, the average frequency of that word in that state (per billion words)
+
+If you look at this dataset in the console, you will notice that the word "a" has a high frequency compared to the other words near the top of the sorted data frame; this makes sense! You can use `inner_join()` to implement a sentiment analysis on this dataset because it is in a tidy format.
+
+#### Instructions
+* In the console, take a look at the `geocoded_tweets` object.
+* Use `get_sentiments()` to access the `"bing"` lexicon and assign it to bing.
+* Use an `inner_join()` to implement sentiment analysis on the geocoded tweet data using the `bing` lexicon.
+
+```{r eval = F}
+load("/Users/lbarcelo/R_Repo/DataCamp/Sentiment Analysis in R: The Tidy Way/Data/geocoded_tweets.rda")
+
+head(geocoded_tweets)
+bing <- get_sentiments(lexicon = "bing")
+geocoded_tweets %>% inner_join(bing)
+```
 
 

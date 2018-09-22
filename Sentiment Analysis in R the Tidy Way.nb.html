@@ -1703,17 +1703,88 @@ $(document).ready(function () {
 
 <div id="TOC">
 <ul>
-<li><a href="#st-segment---tweets-across-the-united-states">1st Segment - Tweets across the United States</a></li>
+<li><a href="#st-segment---tweets-across-the-united-states">1st Segment - Tweets across the United States</a><ul>
+<li><a href="#sentiment-lexicons">Sentiment lexicons</a></li>
+<li><a href="#implement-an-inner-join">Implement an inner join</a></li>
+</ul></li>
 </ul>
 </div>
 
 <!-- rnb-text-begin -->
+<!-- rnb-text-end -->
+<!-- rnb-text-begin -->
 <div id="st-segment---tweets-across-the-united-states" class="section level1">
 <h1>1st Segment - Tweets across the United States</h1>
+<div id="sentiment-lexicons" class="section level2">
+<h2>Sentiment lexicons</h2>
+<p>There are several different <strong>sentiment lexicons</strong> available for sentiment analysis. You will explore three in this course that are available in the <code>tidytext</code> package:</p>
+<ul>
+<li><code>afinn</code> from Finn Årup Nielsen,</li>
+<li><code>bing</code> from Bing Liu and collaborators, and</li>
+<li><code>nrc</code> from Saif Mohammad and Peter Turney.</li>
+</ul>
+<p>You will see how these lexicons can be used as you work through this course. The decision about which lexicon to use often depends on what question you are trying to answer. In this exercise, you will use <code>dplyr</code>’s <code>count()</code> function. If you pass <code>count()</code> a variable, it will count the number of rows that share each distinct value of that variable.</p>
+<div id="instructions" class="section level4">
+<h4>Instructions</h4>
+<ul>
+<li>Load the <code>dplyr</code> and <code>tidytext</code> packages.</li>
+<li>Add an argument to <code>get_sentiments()</code> to see what the <code>&quot;bing&quot;</code> lexicon looks like.</li>
+<li>Then call <code>get_sentiments()</code> for the <code>&quot;nrc&quot;</code> lexicon.</li>
+<li>Add an argument to <code>count()</code> so you can see how many words the <code>nrc</code> lexicon has for each sentiment category.</li>
+</ul>
+<!-- rnb-text-end -->
+<!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjpbImxpYnJhcnkoZHBseXIpIiwibGlicmFyeSh0aWR5dGV4dCkiLCIiLCJnZXRfc2VudGltZW50cyhcImJpbmdcIikiLCJnZXRfc2VudGltZW50cyhcIm5yY1wiKSIsIiIsImdldF9zZW50aW1lbnRzKFwibnJjXCIpICU+JSAiLCIgIGdyb3VwX2J5KHNlbnRpbWVudCkgJT4lICIsIiAgY291bnQoKSIsIiIsImdldF9zZW50aW1lbnRzKFwibnJjXCIpICU+JSBjb3VudChzZW50aW1lbnQpIl19 -->
+<pre class="r"><code>library(dplyr)
+library(tidytext)
+
+get_sentiments(&quot;bing&quot;)
+get_sentiments(&quot;nrc&quot;)
+
+get_sentiments(&quot;nrc&quot;) %&gt;% 
+  group_by(sentiment) %&gt;% 
+  count()
+
+get_sentiments(&quot;nrc&quot;) %&gt;% count(sentiment)</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-chunk-end -->
+<!-- rnb-text-begin -->
+</div>
+</div>
+<div id="implement-an-inner-join" class="section level2">
+<h2>Implement an inner join</h2>
+<p>In this exercise you will implement sentiment analysis using an inner join. The <code>inner_join()</code> function from dplyr will identify which words are in both the sentiment lexicon and the text dataset you are examining. To learn more about joining data frames using dplyr, check out Joining Data in R with <code>dplyr</code>.</p>
+<p>The <code>geocoded_tweets</code> dataset is taken from Quartz and contains three columns:</p>
+<ul>
+<li><code>state</code>, a state in the United States</li>
+<li><code>word</code>, a word used in tweets posted on Twitter</li>
+<li><code>freq</code>, the average frequency of that word in that state (per billion words)</li>
+</ul>
+<p>If you look at this dataset in the console, you will notice that the word “a” has a high frequency compared to the other words near the top of the sorted data frame; this makes sense! You can use <code>inner_join()</code> to implement a sentiment analysis on this dataset because it is in a tidy format.</p>
+<div id="instructions-1" class="section level4">
+<h4>Instructions</h4>
+<ul>
+<li>In the console, take a look at the <code>geocoded_tweets</code> object.</li>
+<li>Use <code>get_sentiments()</code> to access the <code>&quot;bing&quot;</code> lexicon and assign it to bing.</li>
+<li>Use an <code>inner_join()</code> to implement sentiment analysis on the geocoded tweet data using the <code>bing</code> lexicon.</li>
+</ul>
+<!-- rnb-text-end -->
+<!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjpbImxvYWQoXCIvVXNlcnMvbGJhcmNlbG8vUl9SZXBvL0RhdGFDYW1wL1NlbnRpbWVudCBBbmFseXNpcyBpbiBSOiBUaGUgVGlkeSBXYXkvRGF0YS9nZW9jb2RlZF90d2VldHMucmRhXCIpIiwiIiwiaGVhZChnZW9jb2RlZF90d2VldHMpIiwiYmluZyA8LSBnZXRfc2VudGltZW50cyhsZXhpY29uID0gXCJiaW5nXCIpIiwiZ2VvY29kZWRfdHdlZXRzICU+JSBpbm5lcl9qb2luKGJpbmcpIl19 -->
+<pre class="r"><code>load(&quot;/Users/lbarcelo/R_Repo/DataCamp/Sentiment Analysis in R: The Tidy Way/Data/geocoded_tweets.rda&quot;)
+
+head(geocoded_tweets)
+bing &lt;- get_sentiments(lexicon = &quot;bing&quot;)
+geocoded_tweets %&gt;% inner_join(bing)</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-chunk-end -->
+<!-- rnb-text-begin -->
 <!-- rnb-text-end -->
 </div>
+</div>
+</div>
 
-<div id="rmd-source-code">LS0tCnRpdGxlOiAiU2VudGltZW50IEFuYWx5c2lzIGluIFI6IFRoZSBUaWR5IFdheSIKc3VidGl0bGU6ICJEYXRhQ2FtcCBjb3Vyc2UgYnkgSnVsaWEgU2lsZ2UiCmF1dGhvcjogIkxhdXJlbnQgQmFyY2VsbyIKZGF0ZTogIlNlcHRlbWJlciwgMjIsIDIwMTgiCm91dHB1dDogCiAgaHRtbF9ub3RlYm9vazoKICAgIHRvYzogVFJVRQogICAgdG9jX2RlcHRoOiAyCi0tLQoKIyAxc3QgU2VnbWVudCAtIFR3ZWV0cyBhY3Jvc3MgdGhlIFVuaXRlZCBTdGF0ZXMKCgo=</div>
+<div id="rmd-source-code">LS0tCnRpdGxlOiAiU2VudGltZW50IEFuYWx5c2lzIGluIFI6IFRoZSBUaWR5IFdheSIKc3VidGl0bGU6ICJEYXRhQ2FtcCBjb3Vyc2UgYnkgSnVsaWEgU2lsZ2UiCmF1dGhvcjogIkxhdXJlbnQgQmFyY2VsbyIKZGF0ZTogIlNlcHRlbWJlciwgMjIsIDIwMTgiCm91dHB1dDogCiAgaHRtbF9ub3RlYm9vazoKICAgIHRvYzogVFJVRQogICAgdG9jX2RlcHRoOiAyCi0tLQoKYGBge3Igc2V0dXAsIGluY2x1ZGU9RkFMU0V9CmtuaXRyOjpvcHRzX2NodW5rJHNldChldmFsID0gRikKYGBgCgojIDFzdCBTZWdtZW50IC0gVHdlZXRzIGFjcm9zcyB0aGUgVW5pdGVkIFN0YXRlcwoKIyMgU2VudGltZW50IGxleGljb25zCgpUaGVyZSBhcmUgc2V2ZXJhbCBkaWZmZXJlbnQgKipzZW50aW1lbnQgbGV4aWNvbnMqKiBhdmFpbGFibGUgZm9yIHNlbnRpbWVudCBhbmFseXNpcy4gWW91IHdpbGwgZXhwbG9yZSB0aHJlZSBpbiB0aGlzIGNvdXJzZSB0aGF0IGFyZSBhdmFpbGFibGUgaW4gdGhlIGB0aWR5dGV4dGAgcGFja2FnZToKCiogYGFmaW5uYCBmcm9tIEZpbm4gw4VydXAgTmllbHNlbiwKKiBgYmluZ2AgZnJvbSBCaW5nIExpdSBhbmQgY29sbGFib3JhdG9ycywgYW5kCiogYG5yY2AgZnJvbSBTYWlmIE1vaGFtbWFkIGFuZCBQZXRlciBUdXJuZXkuCgpZb3Ugd2lsbCBzZWUgaG93IHRoZXNlIGxleGljb25zIGNhbiBiZSB1c2VkIGFzIHlvdSB3b3JrIHRocm91Z2ggdGhpcyBjb3Vyc2UuIFRoZSBkZWNpc2lvbiBhYm91dCB3aGljaCBsZXhpY29uIHRvIHVzZSBvZnRlbiBkZXBlbmRzIG9uIHdoYXQgcXVlc3Rpb24geW91IGFyZSB0cnlpbmcgdG8gYW5zd2VyLgpJbiB0aGlzIGV4ZXJjaXNlLCB5b3Ugd2lsbCB1c2UgYGRwbHlyYCdzIGBjb3VudCgpYCBmdW5jdGlvbi4gSWYgeW91IHBhc3MgYGNvdW50KClgIGEgdmFyaWFibGUsIGl0IHdpbGwgY291bnQgdGhlIG51bWJlciBvZiByb3dzIHRoYXQgc2hhcmUgZWFjaCBkaXN0aW5jdCB2YWx1ZSBvZiB0aGF0IHZhcmlhYmxlLgoKIyMjIyBJbnN0cnVjdGlvbnMKKiBMb2FkIHRoZSBgZHBseXJgIGFuZCBgdGlkeXRleHRgIHBhY2thZ2VzLgoqIEFkZCBhbiBhcmd1bWVudCB0byBgZ2V0X3NlbnRpbWVudHMoKWAgdG8gc2VlIHdoYXQgdGhlIGAiYmluZyJgIGxleGljb24gbG9va3MgbGlrZS4KKiBUaGVuIGNhbGwgYGdldF9zZW50aW1lbnRzKClgIGZvciB0aGUgYCJucmMiYCBsZXhpY29uLgoqIEFkZCBhbiBhcmd1bWVudCB0byBgY291bnQoKWAgc28geW91IGNhbiBzZWUgaG93IG1hbnkgd29yZHMgdGhlIGBucmNgIGxleGljb24gaGFzIGZvciBlYWNoIHNlbnRpbWVudCBjYXRlZ29yeS4KCmBgYHtyfQpsaWJyYXJ5KGRwbHlyKQpsaWJyYXJ5KHRpZHl0ZXh0KQoKZ2V0X3NlbnRpbWVudHMoImJpbmciKQpnZXRfc2VudGltZW50cygibnJjIikKCmdldF9zZW50aW1lbnRzKCJucmMiKSAlPiUgCiAgZ3JvdXBfYnkoc2VudGltZW50KSAlPiUgCiAgY291bnQoKQoKZ2V0X3NlbnRpbWVudHMoIm5yYyIpICU+JSBjb3VudChzZW50aW1lbnQpCgpgYGAKCiMjIEltcGxlbWVudCBhbiBpbm5lciBqb2luCgpJbiB0aGlzIGV4ZXJjaXNlIHlvdSB3aWxsIGltcGxlbWVudCBzZW50aW1lbnQgYW5hbHlzaXMgdXNpbmcgYW4gaW5uZXIgam9pbi4gVGhlIGBpbm5lcl9qb2luKClgIGZ1bmN0aW9uIGZyb20gZHBseXIgd2lsbCBpZGVudGlmeSB3aGljaCB3b3JkcyBhcmUgaW4gYm90aCB0aGUgc2VudGltZW50IGxleGljb24gYW5kIHRoZSB0ZXh0IGRhdGFzZXQgeW91IGFyZSBleGFtaW5pbmcuIFRvIGxlYXJuIG1vcmUgYWJvdXQgam9pbmluZyBkYXRhIGZyYW1lcyB1c2luZyBkcGx5ciwgY2hlY2sgb3V0IEpvaW5pbmcgRGF0YSBpbiBSIHdpdGggYGRwbHlyYC4KClRoZSBgZ2VvY29kZWRfdHdlZXRzYCBkYXRhc2V0IGlzIHRha2VuIGZyb20gUXVhcnR6IGFuZCBjb250YWlucyB0aHJlZSBjb2x1bW5zOgoKKiBgc3RhdGVgLCBhIHN0YXRlIGluIHRoZSBVbml0ZWQgU3RhdGVzCiogYHdvcmRgLCBhIHdvcmQgdXNlZCBpbiB0d2VldHMgcG9zdGVkIG9uIFR3aXR0ZXIKKiBgZnJlcWAsIHRoZSBhdmVyYWdlIGZyZXF1ZW5jeSBvZiB0aGF0IHdvcmQgaW4gdGhhdCBzdGF0ZSAocGVyIGJpbGxpb24gd29yZHMpCgpJZiB5b3UgbG9vayBhdCB0aGlzIGRhdGFzZXQgaW4gdGhlIGNvbnNvbGUsIHlvdSB3aWxsIG5vdGljZSB0aGF0IHRoZSB3b3JkICJhIiBoYXMgYSBoaWdoIGZyZXF1ZW5jeSBjb21wYXJlZCB0byB0aGUgb3RoZXIgd29yZHMgbmVhciB0aGUgdG9wIG9mIHRoZSBzb3J0ZWQgZGF0YSBmcmFtZTsgdGhpcyBtYWtlcyBzZW5zZSEgWW91IGNhbiB1c2UgYGlubmVyX2pvaW4oKWAgdG8gaW1wbGVtZW50IGEgc2VudGltZW50IGFuYWx5c2lzIG9uIHRoaXMgZGF0YXNldCBiZWNhdXNlIGl0IGlzIGluIGEgdGlkeSBmb3JtYXQuCgojIyMjIEluc3RydWN0aW9ucwoqIEluIHRoZSBjb25zb2xlLCB0YWtlIGEgbG9vayBhdCB0aGUgYGdlb2NvZGVkX3R3ZWV0c2Agb2JqZWN0LgoqIFVzZSBgZ2V0X3NlbnRpbWVudHMoKWAgdG8gYWNjZXNzIHRoZSBgImJpbmciYCBsZXhpY29uIGFuZCBhc3NpZ24gaXQgdG8gYmluZy4KKiBVc2UgYW4gYGlubmVyX2pvaW4oKWAgdG8gaW1wbGVtZW50IHNlbnRpbWVudCBhbmFseXNpcyBvbiB0aGUgZ2VvY29kZWQgdHdlZXQgZGF0YSB1c2luZyB0aGUgYGJpbmdgIGxleGljb24uCgpgYGB7ciBldmFsID0gRn0KbG9hZCgiL1VzZXJzL2xiYXJjZWxvL1JfUmVwby9EYXRhQ2FtcC9TZW50aW1lbnQgQW5hbHlzaXMgaW4gUjogVGhlIFRpZHkgV2F5L0RhdGEvZ2VvY29kZWRfdHdlZXRzLnJkYSIpCgpoZWFkKGdlb2NvZGVkX3R3ZWV0cykKYmluZyA8LSBnZXRfc2VudGltZW50cyhsZXhpY29uID0gImJpbmciKQpnZW9jb2RlZF90d2VldHMgJT4lIGlubmVyX2pvaW4oYmluZykKYGBgCgoK</div>
 
 
 
