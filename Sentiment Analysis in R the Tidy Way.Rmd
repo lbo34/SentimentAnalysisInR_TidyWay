@@ -69,7 +69,108 @@ load("/Users/lbarcelo/R_Repo/DataCamp/Sentiment Analysis in R: The Tidy Way/Data
 
 head(geocoded_tweets)
 bing <- get_sentiments(lexicon = "bing")
-geocoded_tweets %>% inner_join(bing)
+tweets_bing <- geocoded_tweets %>% inner_join(bing)
 ```
 
+## What are the most common sadness words?
+
+After you have implemented sentiment analysis using `inner_join()`, you can use `dplyr` functions such as `group_by()` and `summarize()` to understand your results. For example, what are the most common words related to sadness in this Twitter dataset?
+
+#### Instructions
+Take a look at the `tweets_nrc` object, the output of an `inner join` just like the one you did in the last exercise. Then manipulate it to find the most common words that are related to sadness.
+
+* Filter only the rows that have words associated with sadness.
+* Group by word to find the average across the United States.
+* Use the `summarize()` and `arrange()` verbs find the average frequency for each word, and then sort.
+* Be aware that this is real data from Twitter and there is some use of profanity; the sentiment lexicons include profane and curse words.
+
+```{r}
+# data prep
+nrc <- get_sentiments("nrc")
+tweets_nrc <- geocoded_tweets %>% inner_join(nrc)
+
+tweets_nrc %>% filter(sentiment == "sadness") %>% 
+  group_by(word) %>% 
+  summarise(freq = mean(freq)) %>% 
+  arrange(desc(freq))
+```
+
+## What are the most common joy words?
+
+You can use the same approach from the last exercise to find the most common words associated with joy in these tweets. Use the same pattern of `dplyr` verbs to find a new result.
+
+#### Instructions
+* First, filter to find only words associated with "joy".
+* Next, group by word.
+* Summarize for each word to find the average frequency freq across the whole United States.
+* Arrange in descending order of frequency.
+
+Now you can make a visualization using ggplot2 to see these results.
+* Load the `ggplot2` package.
+* Put words on the x-axis and frequency on the y-axis.
+* Use `geom_col()` to make a bar chart. (If you are familiar with `geom_bar(stat = "identity")`, `geom_col()` does the same thing.)
+
+```{r}
+joy_words <- tweets_nrc %>% 
+  filter(sentiment == "joy") %>% 
+  group_by(word) %>% 
+  summarise(freq = mean(freq)) %>% 
+  arrange(desc(freq))
+
+library(ggplot2)
+
+joy_words %>%
+  top_n(20) %>% 
+  mutate(word = reorder(word, freq)) %>% #otherwise columns are not reordered in spite of the arrange() function
+  ggplot(aes(x = word, y = freq)) +
+  geom_col() +
+  coord_flip()
+```
+
+## Do people in different states use different words?
+
+So far you have looked at the United States as a whole, but you can use this dataset to examine differences in word use by state. In this exercise, you will examine two states and compare their use of joy words. Do they use the same words associated with joy? Do they use these words at the same rate?
+
+#### Instructions
+* Use the correct `dplyr` verb to find only the rows for the state of Utah.
+* Add another condition inside the parentheses to find only the rows for the words associated with joy.
+* Use the `dplyr` verb that arranges a data frame to sort in order of descending frequency.
+* Repeat these steps for the state of Louisiana.
+
+```{r}
+tweets_nrc %>% 
+  filter(state == "utah" & sentiment == "joy") %>%
+  arrange(desc(freq))
+ 
+tweets_nrc %>% 
+  filter(state == "louisiana" & sentiment == "joy") %>%
+  arrange(desc(freq)) 
+```
+
+## Which states have the most positive Twitter users?
+
+For the last exercise in this chapter, you will determine how the overall sentiment of Twitter sentiment varies from state to state. You will use a dataset called `tweets_bing`, which is the output of an inner join created just the same way that you did earlier. Check out what `tweets_bing` looks like in the console.
+
+You can use `group_by()` and `summarize()` to find which states had the highest frequency of positive and negative words, then pipe to `ggplot2` (after some `tidyr` manipulation) to make a clear, interesting visualization.
+
+#### Instructions
+* Choose variables in the call to `group_by()` so that you can `summarize()` by first state and the sentiment.
+* After using `spread()` from `tidyr` and ungrouping, calculate the ratio of positive to negative words for each state.
+* To make a plot, set up `aes()` so that states will go on the `x-axis` and the ratio will go on the `y-axis`.
+* Add the correct `geom_*` layer to make points on the plot.
+The call to `coord_flip()` flips the axes so you can read the names of the states more easily.
+
+```{r}
+library(tidyr)
+
+tweets_bing %>% 
+  group_by(state, sentiment) %>% 
+  summarise(freq = mean(freq)) %>% 
+  spread(sentiment, freq) %>% 
+  ungroup() %>% 
+  mutate(ratio = positive / negative, state = reorder(state, ratio)) %>% 
+  ggplot(aes(x = state, y = ratio)) +
+  geom_point() +
+  coord_flip()
+```
 

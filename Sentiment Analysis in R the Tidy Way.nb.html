@@ -1706,6 +1706,10 @@ $(document).ready(function () {
 <li><a href="#st-segment---tweets-across-the-united-states">1st Segment - Tweets across the United States</a><ul>
 <li><a href="#sentiment-lexicons">Sentiment lexicons</a></li>
 <li><a href="#implement-an-inner-join">Implement an inner join</a></li>
+<li><a href="#what-are-the-most-common-sadness-words">What are the most common sadness words?</a></li>
+<li><a href="#what-are-the-most-common-joy-words">What are the most common joy words?</a></li>
+<li><a href="#do-people-in-different-states-use-different-words">Do people in different states use different words?</a></li>
+<li><a href="#which-states-have-the-most-positive-twitter-users">Which states have the most positive Twitter users?</a></li>
 </ul></li>
 </ul>
 </div>
@@ -1770,12 +1774,131 @@ get_sentiments(&quot;nrc&quot;) %&gt;% count(sentiment)</code></pre>
 </ul>
 <!-- rnb-text-end -->
 <!-- rnb-chunk-begin -->
-<!-- rnb-source-begin eyJkYXRhIjpbImxvYWQoXCIvVXNlcnMvbGJhcmNlbG8vUl9SZXBvL0RhdGFDYW1wL1NlbnRpbWVudCBBbmFseXNpcyBpbiBSOiBUaGUgVGlkeSBXYXkvRGF0YS9nZW9jb2RlZF90d2VldHMucmRhXCIpIiwiIiwiaGVhZChnZW9jb2RlZF90d2VldHMpIiwiYmluZyA8LSBnZXRfc2VudGltZW50cyhsZXhpY29uID0gXCJiaW5nXCIpIiwiZ2VvY29kZWRfdHdlZXRzICU+JSBpbm5lcl9qb2luKGJpbmcpIl19 -->
+<!-- rnb-source-begin eyJkYXRhIjpbImxvYWQoXCIvVXNlcnMvbGJhcmNlbG8vUl9SZXBvL0RhdGFDYW1wL1NlbnRpbWVudCBBbmFseXNpcyBpbiBSOiBUaGUgVGlkeSBXYXkvRGF0YS9nZW9jb2RlZF90d2VldHMucmRhXCIpIiwiIiwiaGVhZChnZW9jb2RlZF90d2VldHMpIiwiYmluZyA8LSBnZXRfc2VudGltZW50cyhsZXhpY29uID0gXCJiaW5nXCIpIiwidHdlZXRzX2JpbmcgPC0gZ2VvY29kZWRfdHdlZXRzICU+JSBpbm5lcl9qb2luKGJpbmcpIl19 -->
 <pre class="r"><code>load(&quot;/Users/lbarcelo/R_Repo/DataCamp/Sentiment Analysis in R: The Tidy Way/Data/geocoded_tweets.rda&quot;)
 
 head(geocoded_tweets)
 bing &lt;- get_sentiments(lexicon = &quot;bing&quot;)
-geocoded_tweets %&gt;% inner_join(bing)</code></pre>
+tweets_bing &lt;- geocoded_tweets %&gt;% inner_join(bing)</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-chunk-end -->
+<!-- rnb-text-begin -->
+</div>
+</div>
+<div id="what-are-the-most-common-sadness-words" class="section level2">
+<h2>What are the most common sadness words?</h2>
+<p>After you have implemented sentiment analysis using <code>inner_join()</code>, you can use <code>dplyr</code> functions such as <code>group_by()</code> and <code>summarize()</code> to understand your results. For example, what are the most common words related to sadness in this Twitter dataset?</p>
+<div id="instructions-2" class="section level4">
+<h4>Instructions</h4>
+<p>Take a look at the <code>tweets_nrc</code> object, the output of an <code>inner join</code> just like the one you did in the last exercise. Then manipulate it to find the most common words that are related to sadness.</p>
+<ul>
+<li>Filter only the rows that have words associated with sadness.</li>
+<li>Group by word to find the average across the United States.</li>
+<li>Use the <code>summarize()</code> and <code>arrange()</code> verbs find the average frequency for each word, and then sort.</li>
+<li>Be aware that this is real data from Twitter and there is some use of profanity; the sentiment lexicons include profane and curse words.</li>
+</ul>
+<!-- rnb-text-end -->
+<!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjpbIiMgZGF0YSBwcmVwIiwibnJjIDwtIGdldF9zZW50aW1lbnRzKFwibnJjXCIpIiwidHdlZXRzX25yYyA8LSBnZW9jb2RlZF90d2VldHMgJT4lIGlubmVyX2pvaW4obnJjKSIsIiIsInR3ZWV0c19ucmMgJT4lIGZpbHRlcihzZW50aW1lbnQgPT0gXCJzYWRuZXNzXCIpICU+JSAiLCIgIGdyb3VwX2J5KHdvcmQpICU+JSAiLCIgIHN1bW1hcmlzZShmcmVxID0gbWVhbihmcmVxKSkgJT4lICIsIiAgYXJyYW5nZShkZXNjKGZyZXEpKSJdfQ== -->
+<pre class="r"><code># data prep
+nrc &lt;- get_sentiments(&quot;nrc&quot;)
+tweets_nrc &lt;- geocoded_tweets %&gt;% inner_join(nrc)
+
+tweets_nrc %&gt;% filter(sentiment == &quot;sadness&quot;) %&gt;% 
+  group_by(word) %&gt;% 
+  summarise(freq = mean(freq)) %&gt;% 
+  arrange(desc(freq))</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-chunk-end -->
+<!-- rnb-text-begin -->
+</div>
+</div>
+<div id="what-are-the-most-common-joy-words" class="section level2">
+<h2>What are the most common joy words?</h2>
+<p>You can use the same approach from the last exercise to find the most common words associated with joy in these tweets. Use the same pattern of <code>dplyr</code> verbs to find a new result.</p>
+<div id="instructions-3" class="section level4">
+<h4>Instructions</h4>
+<ul>
+<li>First, filter to find only words associated with “joy”.</li>
+<li>Next, group by word.</li>
+<li>Summarize for each word to find the average frequency freq across the whole United States.</li>
+<li>Arrange in descending order of frequency.</li>
+</ul>
+<p>Now you can make a visualization using ggplot2 to see these results. * Load the <code>ggplot2</code> package. * Put words on the x-axis and frequency on the y-axis. * Use <code>geom_col()</code> to make a bar chart. (If you are familiar with <code>geom_bar(stat = &quot;identity&quot;)</code>, <code>geom_col()</code> does the same thing.)</p>
+<!-- rnb-text-end -->
+<!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjpbImpveV93b3JkcyA8LSB0d2VldHNfbnJjICU+JSAiLCIgIGZpbHRlcihzZW50aW1lbnQgPT0gXCJqb3lcIikgJT4lICIsIiAgZ3JvdXBfYnkod29yZCkgJT4lICIsIiAgc3VtbWFyaXNlKGZyZXEgPSBtZWFuKGZyZXEpKSAlPiUgIiwiICBhcnJhbmdlKGRlc2MoZnJlcSkpIiwiIiwibGlicmFyeShnZ3Bsb3QyKSIsIiIsImpveV93b3JkcyAlPiUiLCIgIHRvcF9uKDIwKSAlPiUgIiwiICBtdXRhdGUod29yZCA9IHJlb3JkZXIod29yZCwgZnJlcSkpICU+JSAjb3RoZXJ3aXNlIGNvbHVtbnMgYXJlIG5vdCByZW9yZGVyZWQgaW4gc3BpdGUgb2YgdGhlIGFycmFuZ2UoKSBmdW5jdGlvbiIsIiAgZ2dwbG90KGFlcyh4ID0gd29yZCwgeSA9IGZyZXEpKSArIiwiICBnZW9tX2NvbCgpICsiLCIgIGNvb3JkX2ZsaXAoKSJdfQ== -->
+<pre class="r"><code>joy_words &lt;- tweets_nrc %&gt;% 
+  filter(sentiment == &quot;joy&quot;) %&gt;% 
+  group_by(word) %&gt;% 
+  summarise(freq = mean(freq)) %&gt;% 
+  arrange(desc(freq))
+
+library(ggplot2)
+
+joy_words %&gt;%
+  top_n(20) %&gt;% 
+  mutate(word = reorder(word, freq)) %&gt;% #otherwise columns are not reordered in spite of the arrange() function
+  ggplot(aes(x = word, y = freq)) +
+  geom_col() +
+  coord_flip()</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-chunk-end -->
+<!-- rnb-text-begin -->
+</div>
+</div>
+<div id="do-people-in-different-states-use-different-words" class="section level2">
+<h2>Do people in different states use different words?</h2>
+<p>So far you have looked at the United States as a whole, but you can use this dataset to examine differences in word use by state. In this exercise, you will examine two states and compare their use of joy words. Do they use the same words associated with joy? Do they use these words at the same rate?</p>
+<div id="instructions-4" class="section level4">
+<h4>Instructions</h4>
+<ul>
+<li>Use the correct <code>dplyr</code> verb to find only the rows for the state of Utah.</li>
+<li>Add another condition inside the parentheses to find only the rows for the words associated with joy.</li>
+<li>Use the <code>dplyr</code> verb that arranges a data frame to sort in order of descending frequency.</li>
+<li>Repeat these steps for the state of Louisiana.</li>
+</ul>
+<!-- rnb-text-end -->
+<!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjpbInR3ZWV0c19ucmMgJT4lICIsIiAgZmlsdGVyKHN0YXRlID09IFwidXRhaFwiICYgc2VudGltZW50ID09IFwiam95XCIpICU+JSIsIiAgYXJyYW5nZShkZXNjKGZyZXEpKSIsIiAiLCJ0d2VldHNfbnJjICU+JSAiLCIgIGZpbHRlcihzdGF0ZSA9PSBcImxvdWlzaWFuYVwiICYgc2VudGltZW50ID09IFwiam95XCIpICU+JSIsIiAgYXJyYW5nZShkZXNjKGZyZXEpKSAiXX0= -->
+<pre class="r"><code>tweets_nrc %&gt;% 
+  filter(state == &quot;utah&quot; &amp; sentiment == &quot;joy&quot;) %&gt;%
+  arrange(desc(freq))
+ 
+tweets_nrc %&gt;% 
+  filter(state == &quot;louisiana&quot; &amp; sentiment == &quot;joy&quot;) %&gt;%
+  arrange(desc(freq)) </code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-chunk-end -->
+<!-- rnb-text-begin -->
+</div>
+</div>
+<div id="which-states-have-the-most-positive-twitter-users" class="section level2">
+<h2>Which states have the most positive Twitter users?</h2>
+<p>For the last exercise in this chapter, you will determine how the overall sentiment of Twitter sentiment varies from state to state. You will use a dataset called <code>tweets_bing</code>, which is the output of an inner join created just the same way that you did earlier. Check out what <code>tweets_bing</code> looks like in the console.</p>
+<p>You can use <code>group_by()</code> and <code>summarize()</code> to find which states had the highest frequency of positive and negative words, then pipe to <code>ggplot2</code> (after some <code>tidyr</code> manipulation) to make a clear, interesting visualization.</p>
+<div id="instructions-5" class="section level4">
+<h4>Instructions</h4>
+<ul>
+<li>Choose variables in the call to <code>group_by()</code> so that you can <code>summarize()</code> by first state and the sentiment.</li>
+<li>After using <code>spread()</code> from <code>tidyr</code> and ungrouping, calculate the ratio of positive to negative words for each state.</li>
+<li>To make a plot, set up <code>aes()</code> so that states will go on the <code>x-axis</code> and the ratio will go on the <code>y-axis</code>.</li>
+<li>Add the correct <code>geom_*</code> layer to make points on the plot. The call to <code>coord_flip()</code> flips the axes so you can read the names of the states more easily.</li>
+</ul>
+<!-- rnb-text-end -->
+<!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjpbImxpYnJhcnkodGlkeXIpIiwiIiwidHdlZXRzX2JpbmcgJT4lICIsIiAgZ3JvdXBfYnkoc3RhdGUsIHNlbnRpbWVudCkgJT4lICIsIiAgc3VtbWFyaXNlKGZyZXEgPSBtZWFuKGZyZXEpKSAlPiUgIiwiICBzcHJlYWQoc2VudGltZW50LCBmcmVxKSAlPiUgIiwiICB1bmdyb3VwKCkgJT4lICIsIiAgbXV0YXRlKHJhdGlvID0gcG9zaXRpdmUgLyBuZWdhdGl2ZSwgc3RhdGUgPSByZW9yZGVyKHN0YXRlLCByYXRpbykpICU+JSAiLCIgIGdncGxvdChhZXMoeCA9IHN0YXRlLCB5ID0gcmF0aW8pKSArIiwiICBnZW9tX3BvaW50KCkgKyIsIiAgY29vcmRfZmxpcCgpIl19 -->
+<pre class="r"><code>library(tidyr)
+
+tweets_bing %&gt;% 
+  group_by(state, sentiment) %&gt;% 
+  summarise(freq = mean(freq)) %&gt;% 
+  spread(sentiment, freq) %&gt;% 
+  ungroup() %&gt;% 
+  mutate(ratio = positive / negative, state = reorder(state, ratio)) %&gt;% 
+  ggplot(aes(x = state, y = ratio)) +
+  geom_point() +
+  coord_flip()</code></pre>
 <!-- rnb-source-end -->
 <!-- rnb-chunk-end -->
 <!-- rnb-text-begin -->
@@ -1784,7 +1907,7 @@ geocoded_tweets %&gt;% inner_join(bing)</code></pre>
 </div>
 </div>
 
-<div id="rmd-source-code">LS0tCnRpdGxlOiAiU2VudGltZW50IEFuYWx5c2lzIGluIFI6IFRoZSBUaWR5IFdheSIKc3VidGl0bGU6ICJEYXRhQ2FtcCBjb3Vyc2UgYnkgSnVsaWEgU2lsZ2UiCmF1dGhvcjogIkxhdXJlbnQgQmFyY2VsbyIKZGF0ZTogIlNlcHRlbWJlciwgMjIsIDIwMTgiCm91dHB1dDogCiAgaHRtbF9ub3RlYm9vazoKICAgIHRvYzogVFJVRQogICAgdG9jX2RlcHRoOiAyCi0tLQoKYGBge3Igc2V0dXAsIGluY2x1ZGU9RkFMU0V9CmtuaXRyOjpvcHRzX2NodW5rJHNldChldmFsID0gRikKYGBgCgojIDFzdCBTZWdtZW50IC0gVHdlZXRzIGFjcm9zcyB0aGUgVW5pdGVkIFN0YXRlcwoKIyMgU2VudGltZW50IGxleGljb25zCgpUaGVyZSBhcmUgc2V2ZXJhbCBkaWZmZXJlbnQgKipzZW50aW1lbnQgbGV4aWNvbnMqKiBhdmFpbGFibGUgZm9yIHNlbnRpbWVudCBhbmFseXNpcy4gWW91IHdpbGwgZXhwbG9yZSB0aHJlZSBpbiB0aGlzIGNvdXJzZSB0aGF0IGFyZSBhdmFpbGFibGUgaW4gdGhlIGB0aWR5dGV4dGAgcGFja2FnZToKCiogYGFmaW5uYCBmcm9tIEZpbm4gw4VydXAgTmllbHNlbiwKKiBgYmluZ2AgZnJvbSBCaW5nIExpdSBhbmQgY29sbGFib3JhdG9ycywgYW5kCiogYG5yY2AgZnJvbSBTYWlmIE1vaGFtbWFkIGFuZCBQZXRlciBUdXJuZXkuCgpZb3Ugd2lsbCBzZWUgaG93IHRoZXNlIGxleGljb25zIGNhbiBiZSB1c2VkIGFzIHlvdSB3b3JrIHRocm91Z2ggdGhpcyBjb3Vyc2UuIFRoZSBkZWNpc2lvbiBhYm91dCB3aGljaCBsZXhpY29uIHRvIHVzZSBvZnRlbiBkZXBlbmRzIG9uIHdoYXQgcXVlc3Rpb24geW91IGFyZSB0cnlpbmcgdG8gYW5zd2VyLgpJbiB0aGlzIGV4ZXJjaXNlLCB5b3Ugd2lsbCB1c2UgYGRwbHlyYCdzIGBjb3VudCgpYCBmdW5jdGlvbi4gSWYgeW91IHBhc3MgYGNvdW50KClgIGEgdmFyaWFibGUsIGl0IHdpbGwgY291bnQgdGhlIG51bWJlciBvZiByb3dzIHRoYXQgc2hhcmUgZWFjaCBkaXN0aW5jdCB2YWx1ZSBvZiB0aGF0IHZhcmlhYmxlLgoKIyMjIyBJbnN0cnVjdGlvbnMKKiBMb2FkIHRoZSBgZHBseXJgIGFuZCBgdGlkeXRleHRgIHBhY2thZ2VzLgoqIEFkZCBhbiBhcmd1bWVudCB0byBgZ2V0X3NlbnRpbWVudHMoKWAgdG8gc2VlIHdoYXQgdGhlIGAiYmluZyJgIGxleGljb24gbG9va3MgbGlrZS4KKiBUaGVuIGNhbGwgYGdldF9zZW50aW1lbnRzKClgIGZvciB0aGUgYCJucmMiYCBsZXhpY29uLgoqIEFkZCBhbiBhcmd1bWVudCB0byBgY291bnQoKWAgc28geW91IGNhbiBzZWUgaG93IG1hbnkgd29yZHMgdGhlIGBucmNgIGxleGljb24gaGFzIGZvciBlYWNoIHNlbnRpbWVudCBjYXRlZ29yeS4KCmBgYHtyfQpsaWJyYXJ5KGRwbHlyKQpsaWJyYXJ5KHRpZHl0ZXh0KQoKZ2V0X3NlbnRpbWVudHMoImJpbmciKQpnZXRfc2VudGltZW50cygibnJjIikKCmdldF9zZW50aW1lbnRzKCJucmMiKSAlPiUgCiAgZ3JvdXBfYnkoc2VudGltZW50KSAlPiUgCiAgY291bnQoKQoKZ2V0X3NlbnRpbWVudHMoIm5yYyIpICU+JSBjb3VudChzZW50aW1lbnQpCgpgYGAKCiMjIEltcGxlbWVudCBhbiBpbm5lciBqb2luCgpJbiB0aGlzIGV4ZXJjaXNlIHlvdSB3aWxsIGltcGxlbWVudCBzZW50aW1lbnQgYW5hbHlzaXMgdXNpbmcgYW4gaW5uZXIgam9pbi4gVGhlIGBpbm5lcl9qb2luKClgIGZ1bmN0aW9uIGZyb20gZHBseXIgd2lsbCBpZGVudGlmeSB3aGljaCB3b3JkcyBhcmUgaW4gYm90aCB0aGUgc2VudGltZW50IGxleGljb24gYW5kIHRoZSB0ZXh0IGRhdGFzZXQgeW91IGFyZSBleGFtaW5pbmcuIFRvIGxlYXJuIG1vcmUgYWJvdXQgam9pbmluZyBkYXRhIGZyYW1lcyB1c2luZyBkcGx5ciwgY2hlY2sgb3V0IEpvaW5pbmcgRGF0YSBpbiBSIHdpdGggYGRwbHlyYC4KClRoZSBgZ2VvY29kZWRfdHdlZXRzYCBkYXRhc2V0IGlzIHRha2VuIGZyb20gUXVhcnR6IGFuZCBjb250YWlucyB0aHJlZSBjb2x1bW5zOgoKKiBgc3RhdGVgLCBhIHN0YXRlIGluIHRoZSBVbml0ZWQgU3RhdGVzCiogYHdvcmRgLCBhIHdvcmQgdXNlZCBpbiB0d2VldHMgcG9zdGVkIG9uIFR3aXR0ZXIKKiBgZnJlcWAsIHRoZSBhdmVyYWdlIGZyZXF1ZW5jeSBvZiB0aGF0IHdvcmQgaW4gdGhhdCBzdGF0ZSAocGVyIGJpbGxpb24gd29yZHMpCgpJZiB5b3UgbG9vayBhdCB0aGlzIGRhdGFzZXQgaW4gdGhlIGNvbnNvbGUsIHlvdSB3aWxsIG5vdGljZSB0aGF0IHRoZSB3b3JkICJhIiBoYXMgYSBoaWdoIGZyZXF1ZW5jeSBjb21wYXJlZCB0byB0aGUgb3RoZXIgd29yZHMgbmVhciB0aGUgdG9wIG9mIHRoZSBzb3J0ZWQgZGF0YSBmcmFtZTsgdGhpcyBtYWtlcyBzZW5zZSEgWW91IGNhbiB1c2UgYGlubmVyX2pvaW4oKWAgdG8gaW1wbGVtZW50IGEgc2VudGltZW50IGFuYWx5c2lzIG9uIHRoaXMgZGF0YXNldCBiZWNhdXNlIGl0IGlzIGluIGEgdGlkeSBmb3JtYXQuCgojIyMjIEluc3RydWN0aW9ucwoqIEluIHRoZSBjb25zb2xlLCB0YWtlIGEgbG9vayBhdCB0aGUgYGdlb2NvZGVkX3R3ZWV0c2Agb2JqZWN0LgoqIFVzZSBgZ2V0X3NlbnRpbWVudHMoKWAgdG8gYWNjZXNzIHRoZSBgImJpbmciYCBsZXhpY29uIGFuZCBhc3NpZ24gaXQgdG8gYmluZy4KKiBVc2UgYW4gYGlubmVyX2pvaW4oKWAgdG8gaW1wbGVtZW50IHNlbnRpbWVudCBhbmFseXNpcyBvbiB0aGUgZ2VvY29kZWQgdHdlZXQgZGF0YSB1c2luZyB0aGUgYGJpbmdgIGxleGljb24uCgpgYGB7ciBldmFsID0gRn0KbG9hZCgiL1VzZXJzL2xiYXJjZWxvL1JfUmVwby9EYXRhQ2FtcC9TZW50aW1lbnQgQW5hbHlzaXMgaW4gUjogVGhlIFRpZHkgV2F5L0RhdGEvZ2VvY29kZWRfdHdlZXRzLnJkYSIpCgpoZWFkKGdlb2NvZGVkX3R3ZWV0cykKYmluZyA8LSBnZXRfc2VudGltZW50cyhsZXhpY29uID0gImJpbmciKQpnZW9jb2RlZF90d2VldHMgJT4lIGlubmVyX2pvaW4oYmluZykKYGBgCgoK</div>
+<div id="rmd-source-code">LS0tCnRpdGxlOiAiU2VudGltZW50IEFuYWx5c2lzIGluIFI6IFRoZSBUaWR5IFdheSIKc3VidGl0bGU6ICJEYXRhQ2FtcCBjb3Vyc2UgYnkgSnVsaWEgU2lsZ2UiCmF1dGhvcjogIkxhdXJlbnQgQmFyY2VsbyIKZGF0ZTogIlNlcHRlbWJlciwgMjIsIDIwMTgiCm91dHB1dDogCiAgaHRtbF9ub3RlYm9vazoKICAgIHRvYzogVFJVRQogICAgdG9jX2RlcHRoOiAyCi0tLQoKYGBge3Igc2V0dXAsIGluY2x1ZGU9RkFMU0V9CmtuaXRyOjpvcHRzX2NodW5rJHNldChldmFsID0gRikKYGBgCgojIDFzdCBTZWdtZW50IC0gVHdlZXRzIGFjcm9zcyB0aGUgVW5pdGVkIFN0YXRlcwoKIyMgU2VudGltZW50IGxleGljb25zCgpUaGVyZSBhcmUgc2V2ZXJhbCBkaWZmZXJlbnQgKipzZW50aW1lbnQgbGV4aWNvbnMqKiBhdmFpbGFibGUgZm9yIHNlbnRpbWVudCBhbmFseXNpcy4gWW91IHdpbGwgZXhwbG9yZSB0aHJlZSBpbiB0aGlzIGNvdXJzZSB0aGF0IGFyZSBhdmFpbGFibGUgaW4gdGhlIGB0aWR5dGV4dGAgcGFja2FnZToKCiogYGFmaW5uYCBmcm9tIEZpbm4gw4VydXAgTmllbHNlbiwKKiBgYmluZ2AgZnJvbSBCaW5nIExpdSBhbmQgY29sbGFib3JhdG9ycywgYW5kCiogYG5yY2AgZnJvbSBTYWlmIE1vaGFtbWFkIGFuZCBQZXRlciBUdXJuZXkuCgpZb3Ugd2lsbCBzZWUgaG93IHRoZXNlIGxleGljb25zIGNhbiBiZSB1c2VkIGFzIHlvdSB3b3JrIHRocm91Z2ggdGhpcyBjb3Vyc2UuIFRoZSBkZWNpc2lvbiBhYm91dCB3aGljaCBsZXhpY29uIHRvIHVzZSBvZnRlbiBkZXBlbmRzIG9uIHdoYXQgcXVlc3Rpb24geW91IGFyZSB0cnlpbmcgdG8gYW5zd2VyLgpJbiB0aGlzIGV4ZXJjaXNlLCB5b3Ugd2lsbCB1c2UgYGRwbHlyYCdzIGBjb3VudCgpYCBmdW5jdGlvbi4gSWYgeW91IHBhc3MgYGNvdW50KClgIGEgdmFyaWFibGUsIGl0IHdpbGwgY291bnQgdGhlIG51bWJlciBvZiByb3dzIHRoYXQgc2hhcmUgZWFjaCBkaXN0aW5jdCB2YWx1ZSBvZiB0aGF0IHZhcmlhYmxlLgoKIyMjIyBJbnN0cnVjdGlvbnMKKiBMb2FkIHRoZSBgZHBseXJgIGFuZCBgdGlkeXRleHRgIHBhY2thZ2VzLgoqIEFkZCBhbiBhcmd1bWVudCB0byBgZ2V0X3NlbnRpbWVudHMoKWAgdG8gc2VlIHdoYXQgdGhlIGAiYmluZyJgIGxleGljb24gbG9va3MgbGlrZS4KKiBUaGVuIGNhbGwgYGdldF9zZW50aW1lbnRzKClgIGZvciB0aGUgYCJucmMiYCBsZXhpY29uLgoqIEFkZCBhbiBhcmd1bWVudCB0byBgY291bnQoKWAgc28geW91IGNhbiBzZWUgaG93IG1hbnkgd29yZHMgdGhlIGBucmNgIGxleGljb24gaGFzIGZvciBlYWNoIHNlbnRpbWVudCBjYXRlZ29yeS4KCmBgYHtyfQpsaWJyYXJ5KGRwbHlyKQpsaWJyYXJ5KHRpZHl0ZXh0KQoKZ2V0X3NlbnRpbWVudHMoImJpbmciKQpnZXRfc2VudGltZW50cygibnJjIikKCmdldF9zZW50aW1lbnRzKCJucmMiKSAlPiUgCiAgZ3JvdXBfYnkoc2VudGltZW50KSAlPiUgCiAgY291bnQoKQoKZ2V0X3NlbnRpbWVudHMoIm5yYyIpICU+JSBjb3VudChzZW50aW1lbnQpCgpgYGAKCiMjIEltcGxlbWVudCBhbiBpbm5lciBqb2luCgpJbiB0aGlzIGV4ZXJjaXNlIHlvdSB3aWxsIGltcGxlbWVudCBzZW50aW1lbnQgYW5hbHlzaXMgdXNpbmcgYW4gaW5uZXIgam9pbi4gVGhlIGBpbm5lcl9qb2luKClgIGZ1bmN0aW9uIGZyb20gZHBseXIgd2lsbCBpZGVudGlmeSB3aGljaCB3b3JkcyBhcmUgaW4gYm90aCB0aGUgc2VudGltZW50IGxleGljb24gYW5kIHRoZSB0ZXh0IGRhdGFzZXQgeW91IGFyZSBleGFtaW5pbmcuIFRvIGxlYXJuIG1vcmUgYWJvdXQgam9pbmluZyBkYXRhIGZyYW1lcyB1c2luZyBkcGx5ciwgY2hlY2sgb3V0IEpvaW5pbmcgRGF0YSBpbiBSIHdpdGggYGRwbHlyYC4KClRoZSBgZ2VvY29kZWRfdHdlZXRzYCBkYXRhc2V0IGlzIHRha2VuIGZyb20gUXVhcnR6IGFuZCBjb250YWlucyB0aHJlZSBjb2x1bW5zOgoKKiBgc3RhdGVgLCBhIHN0YXRlIGluIHRoZSBVbml0ZWQgU3RhdGVzCiogYHdvcmRgLCBhIHdvcmQgdXNlZCBpbiB0d2VldHMgcG9zdGVkIG9uIFR3aXR0ZXIKKiBgZnJlcWAsIHRoZSBhdmVyYWdlIGZyZXF1ZW5jeSBvZiB0aGF0IHdvcmQgaW4gdGhhdCBzdGF0ZSAocGVyIGJpbGxpb24gd29yZHMpCgpJZiB5b3UgbG9vayBhdCB0aGlzIGRhdGFzZXQgaW4gdGhlIGNvbnNvbGUsIHlvdSB3aWxsIG5vdGljZSB0aGF0IHRoZSB3b3JkICJhIiBoYXMgYSBoaWdoIGZyZXF1ZW5jeSBjb21wYXJlZCB0byB0aGUgb3RoZXIgd29yZHMgbmVhciB0aGUgdG9wIG9mIHRoZSBzb3J0ZWQgZGF0YSBmcmFtZTsgdGhpcyBtYWtlcyBzZW5zZSEgWW91IGNhbiB1c2UgYGlubmVyX2pvaW4oKWAgdG8gaW1wbGVtZW50IGEgc2VudGltZW50IGFuYWx5c2lzIG9uIHRoaXMgZGF0YXNldCBiZWNhdXNlIGl0IGlzIGluIGEgdGlkeSBmb3JtYXQuCgojIyMjIEluc3RydWN0aW9ucwoqIEluIHRoZSBjb25zb2xlLCB0YWtlIGEgbG9vayBhdCB0aGUgYGdlb2NvZGVkX3R3ZWV0c2Agb2JqZWN0LgoqIFVzZSBgZ2V0X3NlbnRpbWVudHMoKWAgdG8gYWNjZXNzIHRoZSBgImJpbmciYCBsZXhpY29uIGFuZCBhc3NpZ24gaXQgdG8gYmluZy4KKiBVc2UgYW4gYGlubmVyX2pvaW4oKWAgdG8gaW1wbGVtZW50IHNlbnRpbWVudCBhbmFseXNpcyBvbiB0aGUgZ2VvY29kZWQgdHdlZXQgZGF0YSB1c2luZyB0aGUgYGJpbmdgIGxleGljb24uCgpgYGB7ciBldmFsID0gRn0KbG9hZCgiL1VzZXJzL2xiYXJjZWxvL1JfUmVwby9EYXRhQ2FtcC9TZW50aW1lbnQgQW5hbHlzaXMgaW4gUjogVGhlIFRpZHkgV2F5L0RhdGEvZ2VvY29kZWRfdHdlZXRzLnJkYSIpCgpoZWFkKGdlb2NvZGVkX3R3ZWV0cykKYmluZyA8LSBnZXRfc2VudGltZW50cyhsZXhpY29uID0gImJpbmciKQp0d2VldHNfYmluZyA8LSBnZW9jb2RlZF90d2VldHMgJT4lIGlubmVyX2pvaW4oYmluZykKYGBgCgojIyBXaGF0IGFyZSB0aGUgbW9zdCBjb21tb24gc2FkbmVzcyB3b3Jkcz8KCkFmdGVyIHlvdSBoYXZlIGltcGxlbWVudGVkIHNlbnRpbWVudCBhbmFseXNpcyB1c2luZyBgaW5uZXJfam9pbigpYCwgeW91IGNhbiB1c2UgYGRwbHlyYCBmdW5jdGlvbnMgc3VjaCBhcyBgZ3JvdXBfYnkoKWAgYW5kIGBzdW1tYXJpemUoKWAgdG8gdW5kZXJzdGFuZCB5b3VyIHJlc3VsdHMuIEZvciBleGFtcGxlLCB3aGF0IGFyZSB0aGUgbW9zdCBjb21tb24gd29yZHMgcmVsYXRlZCB0byBzYWRuZXNzIGluIHRoaXMgVHdpdHRlciBkYXRhc2V0PwoKIyMjIyBJbnN0cnVjdGlvbnMKVGFrZSBhIGxvb2sgYXQgdGhlIGB0d2VldHNfbnJjYCBvYmplY3QsIHRoZSBvdXRwdXQgb2YgYW4gYGlubmVyIGpvaW5gIGp1c3QgbGlrZSB0aGUgb25lIHlvdSBkaWQgaW4gdGhlIGxhc3QgZXhlcmNpc2UuIFRoZW4gbWFuaXB1bGF0ZSBpdCB0byBmaW5kIHRoZSBtb3N0IGNvbW1vbiB3b3JkcyB0aGF0IGFyZSByZWxhdGVkIHRvIHNhZG5lc3MuCgoqIEZpbHRlciBvbmx5IHRoZSByb3dzIHRoYXQgaGF2ZSB3b3JkcyBhc3NvY2lhdGVkIHdpdGggc2FkbmVzcy4KKiBHcm91cCBieSB3b3JkIHRvIGZpbmQgdGhlIGF2ZXJhZ2UgYWNyb3NzIHRoZSBVbml0ZWQgU3RhdGVzLgoqIFVzZSB0aGUgYHN1bW1hcml6ZSgpYCBhbmQgYGFycmFuZ2UoKWAgdmVyYnMgZmluZCB0aGUgYXZlcmFnZSBmcmVxdWVuY3kgZm9yIGVhY2ggd29yZCwgYW5kIHRoZW4gc29ydC4KKiBCZSBhd2FyZSB0aGF0IHRoaXMgaXMgcmVhbCBkYXRhIGZyb20gVHdpdHRlciBhbmQgdGhlcmUgaXMgc29tZSB1c2Ugb2YgcHJvZmFuaXR5OyB0aGUgc2VudGltZW50IGxleGljb25zIGluY2x1ZGUgcHJvZmFuZSBhbmQgY3Vyc2Ugd29yZHMuCgpgYGB7cn0KIyBkYXRhIHByZXAKbnJjIDwtIGdldF9zZW50aW1lbnRzKCJucmMiKQp0d2VldHNfbnJjIDwtIGdlb2NvZGVkX3R3ZWV0cyAlPiUgaW5uZXJfam9pbihucmMpCgp0d2VldHNfbnJjICU+JSBmaWx0ZXIoc2VudGltZW50ID09ICJzYWRuZXNzIikgJT4lIAogIGdyb3VwX2J5KHdvcmQpICU+JSAKICBzdW1tYXJpc2UoZnJlcSA9IG1lYW4oZnJlcSkpICU+JSAKICBhcnJhbmdlKGRlc2MoZnJlcSkpCmBgYAoKIyMgV2hhdCBhcmUgdGhlIG1vc3QgY29tbW9uIGpveSB3b3Jkcz8KCllvdSBjYW4gdXNlIHRoZSBzYW1lIGFwcHJvYWNoIGZyb20gdGhlIGxhc3QgZXhlcmNpc2UgdG8gZmluZCB0aGUgbW9zdCBjb21tb24gd29yZHMgYXNzb2NpYXRlZCB3aXRoIGpveSBpbiB0aGVzZSB0d2VldHMuIFVzZSB0aGUgc2FtZSBwYXR0ZXJuIG9mIGBkcGx5cmAgdmVyYnMgdG8gZmluZCBhIG5ldyByZXN1bHQuCgojIyMjIEluc3RydWN0aW9ucwoqIEZpcnN0LCBmaWx0ZXIgdG8gZmluZCBvbmx5IHdvcmRzIGFzc29jaWF0ZWQgd2l0aCAiam95Ii4KKiBOZXh0LCBncm91cCBieSB3b3JkLgoqIFN1bW1hcml6ZSBmb3IgZWFjaCB3b3JkIHRvIGZpbmQgdGhlIGF2ZXJhZ2UgZnJlcXVlbmN5IGZyZXEgYWNyb3NzIHRoZSB3aG9sZSBVbml0ZWQgU3RhdGVzLgoqIEFycmFuZ2UgaW4gZGVzY2VuZGluZyBvcmRlciBvZiBmcmVxdWVuY3kuCgpOb3cgeW91IGNhbiBtYWtlIGEgdmlzdWFsaXphdGlvbiB1c2luZyBnZ3Bsb3QyIHRvIHNlZSB0aGVzZSByZXN1bHRzLgoqIExvYWQgdGhlIGBnZ3Bsb3QyYCBwYWNrYWdlLgoqIFB1dCB3b3JkcyBvbiB0aGUgeC1heGlzIGFuZCBmcmVxdWVuY3kgb24gdGhlIHktYXhpcy4KKiBVc2UgYGdlb21fY29sKClgIHRvIG1ha2UgYSBiYXIgY2hhcnQuIChJZiB5b3UgYXJlIGZhbWlsaWFyIHdpdGggYGdlb21fYmFyKHN0YXQgPSAiaWRlbnRpdHkiKWAsIGBnZW9tX2NvbCgpYCBkb2VzIHRoZSBzYW1lIHRoaW5nLikKCmBgYHtyfQpqb3lfd29yZHMgPC0gdHdlZXRzX25yYyAlPiUgCiAgZmlsdGVyKHNlbnRpbWVudCA9PSAiam95IikgJT4lIAogIGdyb3VwX2J5KHdvcmQpICU+JSAKICBzdW1tYXJpc2UoZnJlcSA9IG1lYW4oZnJlcSkpICU+JSAKICBhcnJhbmdlKGRlc2MoZnJlcSkpCgpsaWJyYXJ5KGdncGxvdDIpCgpqb3lfd29yZHMgJT4lCiAgdG9wX24oMjApICU+JSAKICBtdXRhdGUod29yZCA9IHJlb3JkZXIod29yZCwgZnJlcSkpICU+JSAjb3RoZXJ3aXNlIGNvbHVtbnMgYXJlIG5vdCByZW9yZGVyZWQgaW4gc3BpdGUgb2YgdGhlIGFycmFuZ2UoKSBmdW5jdGlvbgogIGdncGxvdChhZXMoeCA9IHdvcmQsIHkgPSBmcmVxKSkgKwogIGdlb21fY29sKCkgKwogIGNvb3JkX2ZsaXAoKQpgYGAKCiMjIERvIHBlb3BsZSBpbiBkaWZmZXJlbnQgc3RhdGVzIHVzZSBkaWZmZXJlbnQgd29yZHM/CgpTbyBmYXIgeW91IGhhdmUgbG9va2VkIGF0IHRoZSBVbml0ZWQgU3RhdGVzIGFzIGEgd2hvbGUsIGJ1dCB5b3UgY2FuIHVzZSB0aGlzIGRhdGFzZXQgdG8gZXhhbWluZSBkaWZmZXJlbmNlcyBpbiB3b3JkIHVzZSBieSBzdGF0ZS4gSW4gdGhpcyBleGVyY2lzZSwgeW91IHdpbGwgZXhhbWluZSB0d28gc3RhdGVzIGFuZCBjb21wYXJlIHRoZWlyIHVzZSBvZiBqb3kgd29yZHMuIERvIHRoZXkgdXNlIHRoZSBzYW1lIHdvcmRzIGFzc29jaWF0ZWQgd2l0aCBqb3k/IERvIHRoZXkgdXNlIHRoZXNlIHdvcmRzIGF0IHRoZSBzYW1lIHJhdGU/CgojIyMjIEluc3RydWN0aW9ucwoqIFVzZSB0aGUgY29ycmVjdCBgZHBseXJgIHZlcmIgdG8gZmluZCBvbmx5IHRoZSByb3dzIGZvciB0aGUgc3RhdGUgb2YgVXRhaC4KKiBBZGQgYW5vdGhlciBjb25kaXRpb24gaW5zaWRlIHRoZSBwYXJlbnRoZXNlcyB0byBmaW5kIG9ubHkgdGhlIHJvd3MgZm9yIHRoZSB3b3JkcyBhc3NvY2lhdGVkIHdpdGggam95LgoqIFVzZSB0aGUgYGRwbHlyYCB2ZXJiIHRoYXQgYXJyYW5nZXMgYSBkYXRhIGZyYW1lIHRvIHNvcnQgaW4gb3JkZXIgb2YgZGVzY2VuZGluZyBmcmVxdWVuY3kuCiogUmVwZWF0IHRoZXNlIHN0ZXBzIGZvciB0aGUgc3RhdGUgb2YgTG91aXNpYW5hLgoKYGBge3J9CnR3ZWV0c19ucmMgJT4lIAogIGZpbHRlcihzdGF0ZSA9PSAidXRhaCIgJiBzZW50aW1lbnQgPT0gImpveSIpICU+JQogIGFycmFuZ2UoZGVzYyhmcmVxKSkKIAp0d2VldHNfbnJjICU+JSAKICBmaWx0ZXIoc3RhdGUgPT0gImxvdWlzaWFuYSIgJiBzZW50aW1lbnQgPT0gImpveSIpICU+JQogIGFycmFuZ2UoZGVzYyhmcmVxKSkgCmBgYAoKIyMgV2hpY2ggc3RhdGVzIGhhdmUgdGhlIG1vc3QgcG9zaXRpdmUgVHdpdHRlciB1c2Vycz8KCkZvciB0aGUgbGFzdCBleGVyY2lzZSBpbiB0aGlzIGNoYXB0ZXIsIHlvdSB3aWxsIGRldGVybWluZSBob3cgdGhlIG92ZXJhbGwgc2VudGltZW50IG9mIFR3aXR0ZXIgc2VudGltZW50IHZhcmllcyBmcm9tIHN0YXRlIHRvIHN0YXRlLiBZb3Ugd2lsbCB1c2UgYSBkYXRhc2V0IGNhbGxlZCBgdHdlZXRzX2JpbmdgLCB3aGljaCBpcyB0aGUgb3V0cHV0IG9mIGFuIGlubmVyIGpvaW4gY3JlYXRlZCBqdXN0IHRoZSBzYW1lIHdheSB0aGF0IHlvdSBkaWQgZWFybGllci4gQ2hlY2sgb3V0IHdoYXQgYHR3ZWV0c19iaW5nYCBsb29rcyBsaWtlIGluIHRoZSBjb25zb2xlLgoKWW91IGNhbiB1c2UgYGdyb3VwX2J5KClgIGFuZCBgc3VtbWFyaXplKClgIHRvIGZpbmQgd2hpY2ggc3RhdGVzIGhhZCB0aGUgaGlnaGVzdCBmcmVxdWVuY3kgb2YgcG9zaXRpdmUgYW5kIG5lZ2F0aXZlIHdvcmRzLCB0aGVuIHBpcGUgdG8gYGdncGxvdDJgIChhZnRlciBzb21lIGB0aWR5cmAgbWFuaXB1bGF0aW9uKSB0byBtYWtlIGEgY2xlYXIsIGludGVyZXN0aW5nIHZpc3VhbGl6YXRpb24uCgojIyMjIEluc3RydWN0aW9ucwoqIENob29zZSB2YXJpYWJsZXMgaW4gdGhlIGNhbGwgdG8gYGdyb3VwX2J5KClgIHNvIHRoYXQgeW91IGNhbiBgc3VtbWFyaXplKClgIGJ5IGZpcnN0IHN0YXRlIGFuZCB0aGUgc2VudGltZW50LgoqIEFmdGVyIHVzaW5nIGBzcHJlYWQoKWAgZnJvbSBgdGlkeXJgIGFuZCB1bmdyb3VwaW5nLCBjYWxjdWxhdGUgdGhlIHJhdGlvIG9mIHBvc2l0aXZlIHRvIG5lZ2F0aXZlIHdvcmRzIGZvciBlYWNoIHN0YXRlLgoqIFRvIG1ha2UgYSBwbG90LCBzZXQgdXAgYGFlcygpYCBzbyB0aGF0IHN0YXRlcyB3aWxsIGdvIG9uIHRoZSBgeC1heGlzYCBhbmQgdGhlIHJhdGlvIHdpbGwgZ28gb24gdGhlIGB5LWF4aXNgLgoqIEFkZCB0aGUgY29ycmVjdCBgZ2VvbV8qYCBsYXllciB0byBtYWtlIHBvaW50cyBvbiB0aGUgcGxvdC4KVGhlIGNhbGwgdG8gYGNvb3JkX2ZsaXAoKWAgZmxpcHMgdGhlIGF4ZXMgc28geW91IGNhbiByZWFkIHRoZSBuYW1lcyBvZiB0aGUgc3RhdGVzIG1vcmUgZWFzaWx5LgoKYGBge3J9CmxpYnJhcnkodGlkeXIpCgp0d2VldHNfYmluZyAlPiUgCiAgZ3JvdXBfYnkoc3RhdGUsIHNlbnRpbWVudCkgJT4lIAogIHN1bW1hcmlzZShmcmVxID0gbWVhbihmcmVxKSkgJT4lIAogIHNwcmVhZChzZW50aW1lbnQsIGZyZXEpICU+JSAKICB1bmdyb3VwKCkgJT4lIAogIG11dGF0ZShyYXRpbyA9IHBvc2l0aXZlIC8gbmVnYXRpdmUsIHN0YXRlID0gcmVvcmRlcihzdGF0ZSwgcmF0aW8pKSAlPiUgCiAgZ2dwbG90KGFlcyh4ID0gc3RhdGUsIHkgPSByYXRpbykpICsKICBnZW9tX3BvaW50KCkgKwogIGNvb3JkX2ZsaXAoKQpgYGAKCg==</div>
 
 
 
