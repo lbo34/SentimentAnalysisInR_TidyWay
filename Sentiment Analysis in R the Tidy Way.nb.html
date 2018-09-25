@@ -1711,6 +1711,41 @@ $(document).ready(function () {
 <li><a href="#do-people-in-different-states-use-different-words">Do people in different states use different words?</a></li>
 <li><a href="#which-states-have-the-most-positive-twitter-users">Which states have the most positive Twitter users?</a></li>
 </ul></li>
+<li><a href="#nd-segment---shakespeare-gets-sentimental">2nd Segment - Shakespeare gets Sentimental</a><ul>
+<li><a href="#to-be-or-not-to-be">To be, or not to be</a></li>
+<li><a href="#unnesting-from-text-to-word">Unnesting from text to word</a></li>
+<li><a href="#sentiment-analysis-of-shakespeare">Sentiment analysis of Shakespeare</a></li>
+<li><a href="#tragedy-or-comedy">Tragedy or comedy?</a></li>
+<li><a href="#most-common-positive-and-negative-words">Most common positive and negative words</a></li>
+<li><a href="#word-contributions-by-play">Word contributions by play</a></li>
+<li><a href="#calculating-a-contribution-score">Calculating a contribution score</a></li>
+<li><a href="#alas-poor-yorick">Alas, poor Yorick!</a></li>
+<li><a href="#sentiment-changes-through-a-play">Sentiment changes through a play</a></li>
+<li><a href="#calculating-net-sentiment">Calculating net sentiment</a></li>
+<li><a href="#visualizing-narrative-arcs">Visualizing narrative arcs</a></li>
+</ul></li>
+<li><a href="#rd-segment---analyzing-tv-news">3rd Segment - Analyzing TV news</a><ul>
+<li><a href="#tidying-tv-news">Tidying TV news</a></li>
+<li><a href="#counting-totals">Counting totals</a></li>
+<li><a href="#sentiment-analysis-of-tv-news">Sentiment analysis of TV news</a></li>
+<li><a href="#which-station-uses-the-most-positive-or-negative-words">Which station uses the most positive or negative words?</a></li>
+<li><a href="#which-words-contribute-to-the-sentiment-scores">Which words contribute to the sentiment scores?</a></li>
+<li><a href="#word-choice-and-tv-station">Word choice and TV station</a></li>
+<li><a href="#instructions-22">Instructions</a></li>
+<li><a href="#visualizing-sentiment-over-time">Visualizing sentiment over time</a></li>
+<li><a href="#word-changes-over-time">Word changes over time</a></li>
+</ul></li>
+<li><a href="#th-segment---singing-a-happy-song-or-sad">4th Segment - Singing a Happy Song (or Sad?!)</a><ul>
+<li><a href="#tidying-song-lyrics">Tidying song lyrics</a></li>
+<li><a href="#calculating-total-words-per-song">Calculating total words per song</a></li>
+<li><a href="#sentiment-analysis-on-song-lyrics">Sentiment analysis on song lyrics</a></li>
+<li><a href="#the-most-positive-and-negative-songs">The most positive and negative songs</a></li>
+<li><a href="#sentiment-and-billboard-rank">Sentiment and Billboard rank</a></li>
+<li><a href="#more-on-billboard-rank-and-sentiment-scores">More on Billboard rank and sentiment scores</a></li>
+<li><a href="#sentiment-scores-by-year">Sentiment scores by year</a></li>
+<li><a href="#modeling-negative-sentiment">Modeling negative sentiment</a></li>
+<li><a href="#modeling-positive-sentiment">Modeling positive sentiment</a></li>
+</ul></li>
 </ul>
 </div>
 
@@ -1902,12 +1937,846 @@ tweets_bing %&gt;%
 <!-- rnb-source-end -->
 <!-- rnb-chunk-end -->
 <!-- rnb-text-begin -->
+</div>
+</div>
+</div>
+<div id="nd-segment---shakespeare-gets-sentimental" class="section level1">
+<h1>2nd Segment - Shakespeare gets Sentimental</h1>
+<div id="to-be-or-not-to-be" class="section level2">
+<h2>To be, or not to be</h2>
+<p>Let’s take a look at the dataset you will use in this chapter to learn more about tidying text and sentiment analysis. The <code>shakespeare</code> dataset contains three columns:</p>
+<ul>
+<li><code>title</code>, the title of a Shakespearean play,</li>
+<li><code>type</code>, the type of play, either tragedy or comedy, and</li>
+<li><code>text</code>, a line from that play.</li>
+</ul>
+<p>This data frame contains the entire texts of six plays.</p>
+<div id="instructions-6" class="section level4">
+<h4>Instructions</h4>
+<ul>
+<li>In the console, take a look at the <code>shakespeare</code> object.</li>
+<li>Pipe the data frame with the Shakespeare texts to the next line.</li>
+<li>Use <code>count()</code> with two arguments to find out which titles are in this dataset, whether they are tragedies or comedies, and how many lines they have.</li>
+</ul>
+<!-- rnb-text-end -->
+<!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjpbIiMgZGF0YSBwcmVwIiwibG9hZChcIi9Vc2Vycy9sYmFyY2Vsby9SX1JlcG8vRGF0YUNhbXAvU2VudGltZW50IEFuYWx5c2lzIGluIFI6IFRoZSBUaWR5IFdheS9EYXRhL3NoYWtlc3BlYXJlLnJkYVwiKSIsImhlYWQoc2hha2VzcGVhcmUpIiwiY2xhc3Moc2hha2VzcGVhcmUpIiwiIiwiIiwic2hha2VzcGVhcmUgJT4lIGNvdW50KHRpdGxlLCB0eXBlKSJdfQ== -->
+<pre class="r"><code># data prep
+load(&quot;/Users/lbarcelo/R_Repo/DataCamp/Sentiment Analysis in R: The Tidy Way/Data/shakespeare.rda&quot;)
+head(shakespeare)
+class(shakespeare)
+
+
+shakespeare %&gt;% count(title, type)</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-chunk-end -->
+<!-- rnb-text-begin -->
+</div>
+</div>
+<div id="unnesting-from-text-to-word" class="section level2">
+<h2>Unnesting from text to word</h2>
+<p>The shakespeare dataset is not yet compatible with tidy tools. You need to first break the text into individual tokens (the process of tokenization); a token is a meaningful unit of text for analysis, in many cases, just synonymous with a single word. You also need to transform the text to a tidy data structure with one token per row. You can use tidytext’s <code>unnest_tokens()</code> function to accomplish all of this at once.</p>
+<div id="instructions-7" class="section level4">
+<h4>Instructions</h4>
+<ul>
+<li>Load the <code>tidytext</code> package.</li>
+<li>Group by title to annotate the data frame by line number.</li>
+<li>Define a new column using <code>mutate()</code> called linenumber that keeps track of which line of the play text is from. * (Check out <code>row_number()</code> to do this!)</li>
+<li>Use <code>unnest_tokens()</code> to transform the non-tidy text data to a tidy text dataset.</li>
+<li>Pipe the tidy Shakespeare data frame to the next line.</li>
+<li>Use <code>count()</code> to find out how many times each word is used in Shakespeare’s plays.</li>
+</ul>
+<!-- rnb-text-end -->
+<!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjpbImxpYnJhcnkodGlkeXRleHQpIiwiIiwidGlkeV9zaGFrZXNwZWFyZSA8LSBzaGFrZXNwZWFyZSAlPiUgIiwiICBncm91cF9ieSh0aXRsZSkgJT4lICIsIiAgbXV0YXRlKGxpbmVudW1iZXIgPSByb3dfbnVtYmVyKCkpICU+JSAiLCIgIHVubmVzdF90b2tlbnMod29yZCwgdGV4dCkgJT4lICIsIiAgdW5ncm91cCgpIiwiIiwidGlkeV9zaGFrZXNwZWFyZSAlPiUgIiwiICBjb3VudCh3b3JkLCBzb3J0ID0gVCkiXX0= -->
+<pre class="r"><code>library(tidytext)
+
+tidy_shakespeare &lt;- shakespeare %&gt;% 
+  group_by(title) %&gt;% 
+  mutate(linenumber = row_number()) %&gt;% 
+  unnest_tokens(word, text) %&gt;% 
+  ungroup()
+
+tidy_shakespeare %&gt;% 
+  count(word, sort = T)</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-chunk-end -->
+<!-- rnb-text-begin -->
+</div>
+</div>
+<div id="sentiment-analysis-of-shakespeare" class="section level2">
+<h2>Sentiment analysis of Shakespeare</h2>
+<p>You learned how to implement sentiment analysis with a join in the first chapter of this course. After transforming the text of these Shakespearean plays to a tidy text dataset in the last exercise, the resulting data frame tidy_shakespeare is ready for sentiment analysis with such an approach. Once you have performed the sentiment analysis, you can find out how many negative and positive words each play has with just one line of code.</p>
+<div id="instructions-8" class="section level4">
+<h4>Instructions</h4>
+<ul>
+<li>Use the correct kind of join to implement sentiment analysis.</li>
+<li>Add the “bing” lexicon as the argument to the join function.</li>
+<li>Find how many positive and negative words each play has by using two arguments in <code>count()</code>.</li>
+</ul>
+<!-- rnb-text-end -->
+<!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjpbImJpbmcgPC0gZ2V0X3NlbnRpbWVudHMoXCJiaW5nXCIpIiwiIiwic2hha2VzcGVhcmVfc2VudGltZW50IDwtIHRpZHlfc2hha2VzcGVhcmUgJT4lIiwiICBpbm5lcl9qb2luKGJpbmcpIiwiIiwic2hha2VzcGVhcmVfc2VudGltZW50ICU+JSBjb3VudCh0aXRsZSwgc2VudGltZW50KSJdfQ== -->
+<pre class="r"><code>bing &lt;- get_sentiments(&quot;bing&quot;)
+
+shakespeare_sentiment &lt;- tidy_shakespeare %&gt;%
+  inner_join(bing)
+
+shakespeare_sentiment %&gt;% count(title, sentiment)</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-chunk-end -->
+<!-- rnb-text-begin -->
+</div>
+</div>
+<div id="tragedy-or-comedy" class="section level2">
+<h2>Tragedy or comedy?</h2>
+<p>The tidy dataset you created, <code>tidy_shakespeare</code>, is again available in your environment. Which plays have a higher percentage of negative words? Do the tragedies have more negative words than the comedies?</p>
+<div id="instructions-9" class="section level4">
+<h4>Instructions</h4>
+<p>First, calculate how many negative and positive words each play used.</p>
+<ul>
+<li>Implement sentiment analysis using the <code>&quot;bing&quot;</code> lexicon.</li>
+<li>Use <code>count()</code> to find the number of words for each combination of title, type, and sentiment.</li>
+</ul>
+<p>Now, find the percentage of negative words for each play.</p>
+<ul>
+<li>Group by the titles of the plays.</li>
+<li>Find the total number of words in each play using <code>sum()</code>.</li>
+<li>Calculate a percent for each play that is the number of words of each sentiment divided by the total words in that play.</li>
+<li>Filter the results for only negative sentiment.</li>
+</ul>
+<!-- rnb-text-end -->
+<!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjpbInNlbnRpbWVudF9jb3VudHMgPC0gdGlkeV9zaGFrZXNwZWFyZSAlPiUgIiwiICBpbm5lcl9qb2luKGJpbmcpICU+JSAiLCIgIGNvdW50KHRpdGxlLCB0eXBlLCBzZW50aW1lbnQpIiwiIiwic2VudGltZW50X2NvdW50cyAlPiUgIiwiICBncm91cF9ieSh0aXRsZSkgJT4lICIsIiAgbXV0YXRlKHRvdGFsID0gc3VtKG4pLCBwZXJjZW50ID0gbi90b3RhbCoxMDApICU+JSAiLCIgIGZpbHRlcihzZW50aW1lbnQgPT0gXCJuZWdhdGl2ZVwiKSAlPiUgIiwiICBhcnJhbmdlKHBlcmNlbnQpIl19 -->
+<pre class="r"><code>sentiment_counts &lt;- tidy_shakespeare %&gt;% 
+  inner_join(bing) %&gt;% 
+  count(title, type, sentiment)
+
+sentiment_counts %&gt;% 
+  group_by(title) %&gt;% 
+  mutate(total = sum(n), percent = n/total*100) %&gt;% 
+  filter(sentiment == &quot;negative&quot;) %&gt;% 
+  arrange(percent)</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-chunk-end -->
+<!-- rnb-text-begin -->
+</div>
+</div>
+<div id="most-common-positive-and-negative-words" class="section level2">
+<h2>Most common positive and negative words</h2>
+<p>You found in the previous exercise that Shakespeare’s tragedies use proportionally more negative words than the comedies. Now you can explore which specific words are driving these sentiment scores. Which are the most common positive and negative words in these plays?</p>
+<p>There are three steps in the code in this exercise. The first step counts how many times each word is used, the second step takes the top 10 most-used positive and negative words, and the final step makes a plot to visualize this result.</p>
+<div id="instructions-10" class="section level4">
+<h4>Instructions</h4>
+<ul>
+<li>Implement sentiment analysis using the <code>&quot;bing&quot;</code> lexicon.</li>
+<li>Use <code>count()</code> to find word counts by sentiment.</li>
+<li>Group by sentiment so you can take the top 10 words in each sentiment.</li>
+<li>Notice what the line <code>mutate(word = reorder(word, n))</code> does; it converts word from a character that would be plotted in alphabetical order to a factor that will be plotted in order of n.</li>
+</ul>
+<p>Now you can make a visualization of top_words using <code>ggplot2</code> to see these results.</p>
+<ul>
+<li>Put word on the x-axis and n on the y-axis.</li>
+<li>Use <code>geom_col()</code> to make a bar chart.</li>
+</ul>
+<!-- rnb-text-end -->
+<!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjpbIndvcmRfY291bnRzIDwtIHRpZHlfc2hha2VzcGVhcmUgJT4lICIsIiAgaW5uZXJfam9pbihnZXRfc2VudGltZW50cyhcImJpbmdcIikpICU+JSAiLCIgIGNvdW50KHNlbnRpbWVudCwgd29yZCkgIiwiIiwidG9wX3dvcmRzIDwtIHdvcmRfY291bnRzICU+JSAiLCIgIGdyb3VwX2J5KHNlbnRpbWVudCkgJT4lICIsIiAgdG9wX24oMTApICU+JSAiLCIgIHVuZ3JvdXAoKSAlPiUgI2lmIG5vdCB1bmdyb3VwZWQsIHRoZSByZW9yZGVyIHdvdWxkIG5vdCB3b3JrIiwiICBtdXRhdGUod29yZCA9IHJlb3JkZXIod29yZCwgbikpIiwiIiwiZ2dwbG90KHRvcF93b3JkcywgYWVzKHggPSB3b3JkLCB5ID0gbiwgZmlsbCA9IHNlbnRpbWVudCkpICsiLCIgIGdlb21fY29sKHNob3cubGVnZW5kID0gRikgKyIsIiAgZmFjZXRfd3JhcCh+IHNlbnRpbWVudCwgc2NhbGVzID0gXCJmcmVlXCIpICsiLCIgIGNvb3JkX2ZsaXAoKSJdfQ== -->
+<pre class="r"><code>word_counts &lt;- tidy_shakespeare %&gt;% 
+  inner_join(get_sentiments(&quot;bing&quot;)) %&gt;% 
+  count(sentiment, word) 
+
+top_words &lt;- word_counts %&gt;% 
+  group_by(sentiment) %&gt;% 
+  top_n(10) %&gt;% 
+  ungroup() %&gt;% #if not ungrouped, the reorder would not work
+  mutate(word = reorder(word, n))
+
+ggplot(top_words, aes(x = word, y = n, fill = sentiment)) +
+  geom_col(show.legend = F) +
+  facet_wrap(~ sentiment, scales = &quot;free&quot;) +
+  coord_flip()</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-chunk-end -->
+<!-- rnb-text-begin -->
+</div>
+</div>
+<div id="word-contributions-by-play" class="section level2">
+<h2>Word contributions by play</h2>
+<p>You have already explored how words contribute to sentiment scores for Shakespeare’s plays as a whole. In this exercise, you will look at differences between titles. You will also practice using a different sentiment lexicon, the <code>&quot;afinn&quot;</code> lexicon in which words have a score from -5 to 5. Different lexicons take different approaches to quantifying the emotion/opinion content of words.</p>
+<p>Which words contribute to the overall sentiment in which plays? In this exercise, you will look specifically at Macbeth.</p>
+<div id="instructions-11" class="section level4">
+<h4>Instructions</h4>
+<ul>
+<li>Use <code>count()</code> to find how many times each word is used in each play.</li>
+<li>Implement sentiment analysis with the <code>&quot;afinn&quot;</code> lexicon. (Notice that it is possible to perform sentiment analysis on count data, not only the original tidy data frame.)</li>
+<li>Filter to only look at the sentiment scores for Macbeth; the title for Macbeth is “The Tragedy of Macbeth”.</li>
+<li>In a second argument to <code>filter()</code>, only examine words with negative sentiment.</li>
+</ul>
+<!-- rnb-text-end -->
+<!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjpbInRpZHlfc2hha2VzcGVhcmUgJT4lICIsIiAgY291bnQodGl0bGUsIHdvcmQsIHNvcnQgPSBUKSAlPiUgIiwiICBpbm5lcl9qb2luKGdldF9zZW50aW1lbnRzKFwiYWZpbm5cIikpICU+JSAiLCIgIGZpbHRlcih0aXRsZSA9PSBcIlRoZSBUcmFnZWR5IG9mIE1hY2JldGhcIiwgc2NvcmUgPCAwICkiXX0= -->
+<pre class="r"><code>tidy_shakespeare %&gt;% 
+  count(title, word, sort = T) %&gt;% 
+  inner_join(get_sentiments(&quot;afinn&quot;)) %&gt;% 
+  filter(title == &quot;The Tragedy of Macbeth&quot;, score &lt; 0 )</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-chunk-end -->
+<!-- rnb-text-begin -->
+</div>
+</div>
+<div id="calculating-a-contribution-score" class="section level2">
+<h2>Calculating a contribution score</h2>
+<p>In the last exercise, you saw how words in Macbeth were used different number of times and also had different sentiment scores in the “afinn” lexicon, from -5 to 5. Since this lexicon provides these scores for each word, you can calculate a relative contribution for each word in each play. This contribution can be found by multiplying the score for each word by the times it is used in each play and divided by the total words in each play.</p>
+<div id="instructions-12" class="section level4">
+<h4>Instructions</h4>
+<ul>
+<li>Use <code>count()</code> to find how many times each word is used in each play.</li>
+<li>Implement sentiment analysis with the <code>&quot;afinn&quot;</code> lexicon.</li>
+<li>Group by the titles of the plays to get ready to calculate a total for each play in the next line.</li>
+<li>Calculate a contribution for each word in each play; the contribution can be found by multiplying each word’s score by the times it is used in the play and divided by the total words in the play.</li>
+</ul>
+<!-- rnb-text-end -->
+<!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjpbInNlbnRpbWVudF9jb250cmlidXRpb25zIDwtIHRpZHlfc2hha2VzcGVhcmUgJT4lICIsIiAgY291bnQodGl0bGUsIHdvcmQsIHNvcnQgPSBUKSAlPiUgIiwiICBpbm5lcl9qb2luKGdldF9zZW50aW1lbnRzKFwiYWZpbm5cIikpICU+JSAiLCIgIGdyb3VwX2J5KHRpdGxlKSAlPiUgIiwiICBtdXRhdGUoY29udHJpYnV0aW9uID0gc2NvcmUgKiBuIC8gc3VtKG4pKSAlPiUgIiwiICB1bmdyb3VwKCkiLCIiLCJzZW50aW1lbnRfY29udHJpYnV0aW9ucyJdfQ== -->
+<pre class="r"><code>sentiment_contributions &lt;- tidy_shakespeare %&gt;% 
+  count(title, word, sort = T) %&gt;% 
+  inner_join(get_sentiments(&quot;afinn&quot;)) %&gt;% 
+  group_by(title) %&gt;% 
+  mutate(contribution = score * n / sum(n)) %&gt;% 
+  ungroup()
+
+sentiment_contributions</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-chunk-end -->
+<!-- rnb-text-begin -->
+</div>
+</div>
+<div id="alas-poor-yorick" class="section level2">
+<h2>Alas, poor Yorick!</h2>
+<p>The <code>sentiment_contributions</code> that you calculated in the last exercise is available in your environment. It’s time to explore some of your results! Look at Hamlet and The Merchant of Venice to see what negative and positive words are important in these two plays.</p>
+<div id="instructions-13" class="section level4">
+<h4>Instructions</h4>
+<ul>
+<li>Look at <code>sentiment_contributions</code> in the console and use whatever strategy you like to find the exact titles for Hamlet and The Merchant of Venice. (Perhaps <code>count()</code>?)</li>
+<li>Filter for Hamlet and <code>arrange()</code> in ascending order (the default order) of contribution to see the words that contributed most negatively.</li>
+<li>Filter for The Merchant of Venice and <code>arrange()</code> in descending order of contribution to see the words that contributed most positively.</li>
+</ul>
+<!-- rnb-text-end -->
+<!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjpbInNlbnRpbWVudF9jb250cmlidXRpb25zICU+JSIsIiAgZmlsdGVyKHRpdGxlID09IFwiSGFtbGV0LCBQcmluY2Ugb2YgRGVubWFya1wiKSAlPiUgIiwiICBhcnJhbmdlKGNvbnRyaWJ1dGlvbikiLCIiLCJzZW50aW1lbnRfY29udHJpYnV0aW9ucyAlPiUiLCIgIGZpbHRlcih0aXRsZSA9PSBcIlRoZSBNZXJjaGFudCBvZiBWZW5pY2VcIikgJT4lICIsIiAgYXJyYW5nZShkZXNjKGNvbnRyaWJ1dGlvbikpIl19 -->
+<pre class="r"><code>sentiment_contributions %&gt;%
+  filter(title == &quot;Hamlet, Prince of Denmark&quot;) %&gt;% 
+  arrange(contribution)
+
+sentiment_contributions %&gt;%
+  filter(title == &quot;The Merchant of Venice&quot;) %&gt;% 
+  arrange(desc(contribution))</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-chunk-end -->
+<!-- rnb-text-begin -->
+</div>
+</div>
+<div id="sentiment-changes-through-a-play" class="section level2">
+<h2>Sentiment changes through a play</h2>
+<p>In the last set of exercises in this chapter, you will examine how sentiment changes through the narrative arcs of these Shakespearean plays. We will start by first implementing sentiment analysis using <code>inner_join()</code>, and then use <code>count()</code> with four arguments:</p>
+<ul>
+<li><code>title</code>,</li>
+<li><code>type</code>,</li>
+<li>an <code>index</code> that will section together lines of the play, and</li>
+<li><code>sentiment</code>.</li>
+</ul>
+<p>After these lines of code, you will have the number of positive and negative words used in each <code>index</code>-ed section of the play. These sections will be 70 lines long in your analysis here. You want a chunk of text that is not too small (because then the sentiment changes will be very noisy) and not too big (because then you will not be able to see plot structure). In an analysis of this type you may need to experiment with what size chunks to make; sections of 70 lines works well for these plays.</p>
+<div id="instructions-14" class="section level4">
+<h4>Instructions</h4>
+<ul>
+<li>Implement sentiment analysis using the <code>&quot;bing&quot;</code> lexicon.</li>
+<li>Use <code>count()</code> to find the number of words for each sentiment used in each play in sections, using four arguments.</li>
+<li>The first argument for <code>count()</code> maps to the plays themselves.</li>
+<li>The second argument keeps track of whether the play is a comedy or tragedy.</li>
+<li>The third argument is defined by you; call it index and set it equal to <code>linenumber %/% 70</code>. This index makes chunks of text that are 70 lines long using integer division (<code>%/%</code>).</li>
+<li>The fourth argument maps to the different sentiment categories.</li>
+</ul>
+<!-- rnb-text-end -->
+<!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjpbInRpZHlfc2hha2VzcGVhcmUgJT4lICIsIiAgaW5uZXJfam9pbihnZXRfc2VudGltZW50cyhcImJpbmdcIikpICU+JSAiLCIgIGNvdW50KHRpdGxlLCB0eXBlLCBpbmRleCA9IGxpbmVudW1iZXIgJS8lIDcwLCBzZW50aW1lbnQpICMjIFZFUlkgSU1QT1JUQU5UIFRPIFJFTUVNQkVSIFRISVMgQ09ERSAgIl19 -->
+<pre class="r"><code>tidy_shakespeare %&gt;% 
+  inner_join(get_sentiments(&quot;bing&quot;)) %&gt;% 
+  count(title, type, index = linenumber %/% 70, sentiment) ## VERY IMPORTANT TO REMEMBER THIS CODE  </code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-chunk-end -->
+<!-- rnb-text-begin -->
+</div>
+</div>
+<div id="calculating-net-sentiment" class="section level2">
+<h2>Calculating net sentiment</h2>
+<p>Now you will build on the code from the previous exercise and continue to move forward to see how sentiment changes through these Shakespearean plays. The next steps involve <code>spread()</code> from the tidyr package. After these lines of code, you will have the net sentiment in each index-ed section of the play; net sentiment is the negative sentiment subtracted from the positive sentiment.</p>
+<div id="instructions-15" class="section level4">
+<h4>Instructions</h4>
+<ul>
+<li>Load the <code>tidyr</code> package.</li>
+<li>Use <code>spread()</code> to spread sentiment and n across multiple columns.</li>
+<li>Take a look at the output of the process after the <code>spread()</code> line in the console.</li>
+<li>Make a new column using <code>mutate()</code> that has the net sentiment found by subtracting negative sentiment from positive.</li>
+</ul>
+<!-- rnb-text-end -->
+<!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjpbImxpYnJhcnkodGlkeXIpIiwidGlkeV9zaGFrZXNwZWFyZSAlPiUgIiwiICBpbm5lcl9qb2luKGdldF9zZW50aW1lbnRzKFwiYmluZ1wiKSkgJT4lICIsIiAgY291bnQodGl0bGUsIHR5cGUsIGluZGV4ID0gbGluZW51bWJlciAlLyUgNzAsIHNlbnRpbWVudCkgJT4lICIsIiAgc3ByZWFkKGtleSA9IHNlbnRpbWVudCwgdmFsdWUgPSBuLCBmaWxsID0gMCkgJT4lICIsIiAgbXV0YXRlKHNlbnRpbWVudCA9IHBvc2l0aXZlIC0gbmVnYXRpdmUpIl19 -->
+<pre class="r"><code>library(tidyr)
+tidy_shakespeare %&gt;% 
+  inner_join(get_sentiments(&quot;bing&quot;)) %&gt;% 
+  count(title, type, index = linenumber %/% 70, sentiment) %&gt;% 
+  spread(key = sentiment, value = n, fill = 0) %&gt;% 
+  mutate(sentiment = positive - negative)</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-chunk-end -->
+<!-- rnb-text-begin -->
+</div>
+</div>
+<div id="visualizing-narrative-arcs" class="section level2">
+<h2>Visualizing narrative arcs</h2>
+<p>Now, in this final exercise exploring Shakespearean plays, you will continue to build on your manipulations of this text dataset and visualize the results of this sentiment analysis. How does sentiment change through the narrative arcs of these six plays by Shakespeare?</p>
+<div id="instructions-16" class="section level4">
+<h4>Instructions</h4>
+<ul>
+<li>Load the ggplot2 package.</li>
+<li>Put <code>index</code> on the x-axis, <code>sentiment</code> on the y-axis, and use <code>type</code> for <code>fill</code>.</li>
+<li>Use <code>geom_col()</code> to make a bar chart. (If you are familiar with <code>geom_bar(stat = &quot;identity&quot;)</code>, <code>geom_col()</code> does the same thing.)</li>
+<li>Call <code>facet_wrap()</code> to make a separate panel for each title; be sure to add <code>scales = &quot;free_x&quot;</code> so the x-axes behave nicely.</li>
+</ul>
+<!-- rnb-text-end -->
+<!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjpbImxpYnJhcnkoZ2dwbG90MikiLCIiLCJ0aWR5X3NoYWtlc3BlYXJlICU+JSAiLCIgIGlubmVyX2pvaW4oZ2V0X3NlbnRpbWVudHMoXCJiaW5nXCIpKSAlPiUgIiwiICBjb3VudCh0aXRsZSwgdHlwZSwgaW5kZXggPSBsaW5lbnVtYmVyICUvJSA3MCwgc2VudGltZW50KSAlPiUgIiwiICBzcHJlYWQoa2V5ID0gc2VudGltZW50LCB2YWx1ZSA9IG4sIGZpbGwgPSAwKSAlPiUgIiwiICBtdXRhdGUoc2VudGltZW50ID0gcG9zaXRpdmUgLSBuZWdhdGl2ZSkgJT4lICIsIiAgZ2dwbG90KGFlcyh4ID0gaW5kZXgsIHkgPSBzZW50aW1lbnQsIGZpbGwgPSB0eXBlKSkgKyIsIiAgZ2VvbV9jb2woc2hvdy5sZWdlbmQgPSBGKSArIiwiICBmYWNldF93cmFwKH4gdGl0bGUsIHNjYWxlcyA9IFwiZnJlZV94XCIpIl19 -->
+<pre class="r"><code>library(ggplot2)
+
+tidy_shakespeare %&gt;% 
+  inner_join(get_sentiments(&quot;bing&quot;)) %&gt;% 
+  count(title, type, index = linenumber %/% 70, sentiment) %&gt;% 
+  spread(key = sentiment, value = n, fill = 0) %&gt;% 
+  mutate(sentiment = positive - negative) %&gt;% 
+  ggplot(aes(x = index, y = sentiment, fill = type)) +
+  geom_col(show.legend = F) +
+  facet_wrap(~ title, scales = &quot;free_x&quot;)</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-chunk-end -->
+<!-- rnb-text-begin -->
+</div>
+</div>
+</div>
+<div id="rd-segment---analyzing-tv-news" class="section level1">
+<h1>3rd Segment - Analyzing TV news</h1>
+<div id="tidying-tv-news" class="section level2">
+<h2>Tidying TV news</h2>
+<p>Take a look at the dataset of TV news text about climate change you will use in this chapter. The <code>climate_text</code> dataset contains almost 600 closed captioning snippets and four columns:</p>
+<ul>
+<li><code>station</code>, the TV news station where the text is from,</li>
+<li><code>show</code>, the show on that station where the text was spoken,</li>
+<li><code>show_date</code>, the broadcast date of the spoken text, and</li>
+<li><code>text</code>, the actual text spoken on TV.</li>
+</ul>
+<p>Type <code>climate_text</code> in the console to take a look at the dataset before getting started with transforming it to a tidy format.</p>
+<div id="instructions-17" class="section level4">
+<h4>Instructions</h4>
+<ul>
+<li>Load the <code>tidytext</code> package.</li>
+<li>Pipe the original dataset to the next line.</li>
+<li>Use <code>unnest_tokens()</code> to transform the non-tidy text data to a tidy text dataset, with a <code>word</code> column in the output.</li>
+</ul>
+<!-- rnb-text-end -->
+<!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjpbIiMgZGF0YSBwcmVwIiwibG9hZChcIi9Vc2Vycy9sYmFyY2Vsby9SX1JlcG8vRGF0YUNhbXAvU2VudGltZW50IEFuYWx5c2lzIGluIFI6IFRoZSBUaWR5IFdheS9EYXRhL2NsaW1hdGVfdGV4dC5yZGFcIikiLCIiLCJjbGltYXRlX3RleHQiLCIiLCJsaWJyYXJ5KHRpZHl0ZXh0KSIsIiIsInRpZHlfdHYgPC0gY2xpbWF0ZV90ZXh0ICU+JSAiLCIgIHVubmVzdF90b2tlbnMoaW5wdXQgPSB0ZXh0LCBvdXRwdXQgPSB3b3JkKSJdfQ== -->
+<pre class="r"><code># data prep
+load(&quot;/Users/lbarcelo/R_Repo/DataCamp/Sentiment Analysis in R: The Tidy Way/Data/climate_text.rda&quot;)
+
+climate_text
+
+library(tidytext)
+
+tidy_tv &lt;- climate_text %&gt;% 
+  unnest_tokens(input = text, output = word)</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-chunk-end -->
+<!-- rnb-text-begin -->
+</div>
+</div>
+<div id="counting-totals" class="section level2">
+<h2>Counting totals</h2>
+<p>Now that you have transformed the TV news data to a tidy data structure, you can find out what words are most common when discussing climate change on TV news, as well as the total number of words from each station. These are both helpful exploratory steps before moving on in analysis!</p>
+<div id="instructions-18" class="section level4">
+<h4>Instructions</h4>
+<ul>
+<li>Find the most common words in this dataset with <code>count()</code> using <code>sort = TRUE</code>. (The command <code>anti_join(stop_words)</code> removes common words like “and”, “of”, and “to.”)</li>
+</ul>
+<p>You will now calculate the total number of words from each station, a quantity you’ll use to find proportions later.</p>
+<ul>
+<li>Use <code>count()</code> with one argument to find how many words came from each stations.</li>
+<li>Change the name of the new column with <code>rename()</code> so that it is called <code>station_total</code> instead of <code>n</code>.</li>
+</ul>
+<!-- rnb-text-end -->
+<!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjpbInRpZHlfdHYgJT4lICIsIiAgYW50aV9qb2luKHN0b3Bfd29yZHMpICU+JSAjcmVtb3ZlcyBzdG9wIHdvcmRzLiBkYXRhc2V0IGlzIGluY2x1ZGVkIGluIHRoZSB0aWR5dGV4dCBsaWJyYXJ5IiwiICBjb3VudCh3b3JkLCBzb3J0ID0gVCkiLCIiLCJ0aWR5X3R2ICU+JSAiLCIgIGNvdW50KHN0YXRpb24pICU+JSAiLCIgIHJlbmFtZShzdGF0aW9uX3RvdGFsID0gbikiXX0= -->
+<pre class="r"><code>tidy_tv %&gt;% 
+  anti_join(stop_words) %&gt;% #removes stop words. dataset is included in the tidytext library
+  count(word, sort = T)
+
+tidy_tv %&gt;% 
+  count(station) %&gt;% 
+  rename(station_total = n)</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-chunk-end -->
+<!-- rnb-text-begin -->
+</div>
+</div>
+<div id="sentiment-analysis-of-tv-news" class="section level2">
+<h2>Sentiment analysis of TV news</h2>
+<p>After transforming the TV news texts to a tidy format in a previous exercise, the resulting data frame <code>tidy_tv</code> is ready for sentiment analysis using tidy data principles. Before you implement the inner join, add new column with the total number of words from each station so you can calculate proportions soon.</p>
+<div id="instructions-19" class="section level4">
+<h4>Instructions</h4>
+<ul>
+<li>Define groups for each station in the dataset using <code>group_by()</code>.</li>
+<li>Make a new column called <code>station_total</code> in the dataframe that tallies the total number of words from each station; the <code>mutate()</code> verb will make a new column and the function <code>n()</code> counts the number of observations in the current group.</li>
+<li>Finally, implement sentiment analysis using the correct kind of join and the <code>&quot;nrc&quot;</code> lexicon as the argument to the join function.</li>
+</ul>
+<!-- rnb-text-end -->
+<!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjpbInR2X3NlbnRpbWVudCA8LSB0aWR5X3R2ICU+JSAiLCIgIGdyb3VwX2J5KHN0YXRpb24pICU+JSAiLCIgIG11dGF0ZShzdGF0aW9uX3RvdGFsID0gbigpKSAlPiUgIiwiICB1bmdyb3VwKCkgJT4lICIsIiAgaW5uZXJfam9pbihnZXRfc2VudGltZW50cyhcIm5yY1wiKSkiXX0= -->
+<pre class="r"><code>tv_sentiment &lt;- tidy_tv %&gt;% 
+  group_by(station) %&gt;% 
+  mutate(station_total = n()) %&gt;% 
+  ungroup() %&gt;% 
+  inner_join(get_sentiments(&quot;nrc&quot;))</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-chunk-end -->
+<!-- rnb-text-begin -->
+</div>
+</div>
+<div id="which-station-uses-the-most-positive-or-negative-words" class="section level2">
+<h2>Which station uses the most positive or negative words?</h2>
+<p>You performed sentiment analysis on this dataset of TV news text, and the results are available in your environment in <code>tv_sentiment</code>. How do the words used when discussing climate change compare across stations? Which stations use more positive words? More negative words?</p>
+<div id="instructions-20" class="section level4">
+<h4>Instructions</h4>
+<p>Start off by looking at negative words.</p>
+<ul>
+<li>Define a new column <code>percent</code> using mutate() that is <code>n</code> divided by <code>station_total</code>, the proportion of words that belong to that sentiment.</li>
+<li>Filter only for the negative sentiment rows.</li>
+<li>Arrange by <code>percent</code> so you can see the results sorted by proportion of negative words.</li>
+</ul>
+<p>Now repeat these steps to examine positive words!</p>
+<!-- rnb-text-end -->
+<!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjpbInR2X3NlbnRpbWVudCAlPiUgIiwiICBjb3VudChzdGF0aW9uLCBzZW50aW1lbnQsIHN0YXRpb25fdG90YWwpICU+JSAiLCIgIG11dGF0ZShwZXJjZW50ID0gbiAvIHN0YXRpb25fdG90YWwpICU+JSIsIiAgZmlsdGVyKHNlbnRpbWVudCA9PSBcIm5lZ2F0aXZlXCIpICU+JSAiLCIgIGFycmFuZ2UocGVyY2VudCkiLCIiLCJ0dl9zZW50aW1lbnQgJT4lICIsIiAgY291bnQoc3RhdGlvbiwgc2VudGltZW50LCBzdGF0aW9uX3RvdGFsKSAlPiUgIiwiICBtdXRhdGUocGVyY2VudCA9IG4gLyBzdGF0aW9uX3RvdGFsKSAlPiUiLCIgIGZpbHRlcihzZW50aW1lbnQgPT0gXCJwb3NpdGl2ZVwiKSAlPiUgIiwiICBhcnJhbmdlKHBlcmNlbnQpIl19 -->
+<pre class="r"><code>tv_sentiment %&gt;% 
+  count(station, sentiment, station_total) %&gt;% 
+  mutate(percent = n / station_total) %&gt;%
+  filter(sentiment == &quot;negative&quot;) %&gt;% 
+  arrange(percent)
+
+tv_sentiment %&gt;% 
+  count(station, sentiment, station_total) %&gt;% 
+  mutate(percent = n / station_total) %&gt;%
+  filter(sentiment == &quot;positive&quot;) %&gt;% 
+  arrange(percent)</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-chunk-end -->
+<!-- rnb-text-begin -->
+</div>
+</div>
+<div id="which-words-contribute-to-the-sentiment-scores" class="section level2">
+<h2>Which words contribute to the sentiment scores?</h2>
+<p>It’s important to understand which words specifically are driving sentiment scores, and when you use tidy data principles, it’s not too difficult to check. In this exercise, you will make a plot showing which words contribute the most to the ten types of sentiment in the NRC lexicon. Look at the result, and think about which words might not be appropriate in these contexts. Are there proper names? Are there words which used in these contexts are neutral?</p>
+<p>If so, you can always remove these words from your dataset (or the sentiment lexicon) using <code>anti_join()</code>.</p>
+<div id="instructions-21" class="section level4">
+<h4>Instructions</h4>
+<ul>
+<li>Count by word and sentiment to find which words are contributing most overall to the sentiment scores.</li>
+<li>Group by sentiment.</li>
+<li>Take the top 10 words for each sentiment using <code>top_n()</code>.</li>
+<li>Set up the plot using <code>aes()</code>, with the words on the x-axis, the number of uses <code>n</code> on the y-axis, and fill corresponding to sentiment.</li>
+</ul>
+<!-- rnb-text-end -->
+<!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjpbInR2X3NlbnRpbWVudCAlPiUgIiwiICBjb3VudChzZW50aW1lbnQsIHdvcmQpICU+JSAiLCIgIGdyb3VwX2J5KHNlbnRpbWVudCkgJT4lICIsIiAgdG9wX24oMTApICU+JSAiLCIgIHVuZ3JvdXAoKSAlPiUgIiwiICBtdXRhdGUod29yZCA9IHJlb3JkZXIod29yZCwgbikpICU+JSAiLCIgIGdncGxvdChhZXMoeCA9IHdvcmQsIHkgPSBuLCBmaWxsID0gc2VudGltZW50KSkgKyIsIiAgZ2VvbV9jb2woc2hvdy5sZWdlbmQgPSBGQUxTRSkgKyIsIiAgZmFjZXRfd3JhcCh+c2VudGltZW50LCBzY2FsZXMgPSBcImZyZWVcIikgKyIsIiAgY29vcmRfZmxpcCgpIl19 -->
+<pre class="r"><code>tv_sentiment %&gt;% 
+  count(sentiment, word) %&gt;% 
+  group_by(sentiment) %&gt;% 
+  top_n(10) %&gt;% 
+  ungroup() %&gt;% 
+  mutate(word = reorder(word, n)) %&gt;% 
+  ggplot(aes(x = word, y = n, fill = sentiment)) +
+  geom_col(show.legend = FALSE) +
+  facet_wrap(~sentiment, scales = &quot;free&quot;) +
+  coord_flip()</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-chunk-end -->
+<!-- rnb-text-begin -->
+</div>
+</div>
+<div id="word-choice-and-tv-station" class="section level2">
+<h2>Word choice and TV station</h2>
+<p>In the last exercise, you saw which words contributed to which sentiment for this dataset of closed captioning texts about climate change from TV news station. Now it’s time to explore the different words that each station used in the context of discussing climate change. Which negative words did each station use when talking about climate change on the air?</p>
+</div>
+<div id="instructions-22" class="section level2">
+<h2>Instructions</h2>
+<ul>
+<li>Filter for only negative words.</li>
+<li>Count by word and station to find which words are contributing most overall to the sentiment scores.</li>
+<li>Group by TV station.</li>
+<li>Take the top 10 words for each station.</li>
+<li>Set up the plot using <code>aes()</code>, with the words on the x-axis, the number of uses <code>n</code> on the y-axis, and <code>fill</code> corresponding to station.</li>
+</ul>
+<!-- rnb-text-end -->
+<!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjpbInR2X3NlbnRpbWVudCAlPiUgIiwiICBmaWx0ZXIoc2VudGltZW50ID09IFwibmVnYXRpdmVcIikgJT4lICIsIiAgY291bnQod29yZCwgc3RhdGlvbikgJT4lICIsIiAgZ3JvdXBfYnkoc3RhdGlvbikgJT4lICIsIiAgdG9wX24oMTAsIHd0ID0gbikgJT4lICIsIiAgdW5ncm91cCgpICU+JSAiLCIgIG11dGF0ZSh3b3JkID0gcmVvcmRlcihwYXN0ZSh3b3JkLCBzdGF0aW9uLCBzZXAgPSBcIl9fXCIpLCBuKSkgJT4lICMjIHdpdGhvdXQgdGhpcyBpdCBpcyBub3Qgd2VsbCBvcmRlcmVkLiIsIiAgZ2dwbG90KGFlcyh4ID0gd29yZCwgeSA9IG4sIGZpbGwgPSBzdGF0aW9uKSkgKyIsIiAgZ2VvbV9jb2woc2hvdy5sZWdlbmQgPSBGKSArIiwiICBzY2FsZV94X2Rpc2NyZXRlKGxhYmVscyA9IGZ1bmN0aW9uKHgpIGdzdWIoXCJfXy4rJFwiLCBcIlwiLCB4KSkgKyIsIiAgZmFjZXRfd3JhcCh+c3RhdGlvbiwgbnJvdyA9IDIsIHNjYWxlcyA9IFwiZnJlZVwiKSArIiwiICBjb29yZF9mbGlwKCkiXX0= -->
+<pre class="r"><code>tv_sentiment %&gt;% 
+  filter(sentiment == &quot;negative&quot;) %&gt;% 
+  count(word, station) %&gt;% 
+  group_by(station) %&gt;% 
+  top_n(10, wt = n) %&gt;% 
+  ungroup() %&gt;% 
+  mutate(word = reorder(paste(word, station, sep = &quot;__&quot;), n)) %&gt;% ## without this it is not well ordered.
+  ggplot(aes(x = word, y = n, fill = station)) +
+  geom_col(show.legend = F) +
+  scale_x_discrete(labels = function(x) gsub(&quot;__.+$&quot;, &quot;&quot;, x)) +
+  facet_wrap(~station, nrow = 2, scales = &quot;free&quot;) +
+  coord_flip()</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-chunk-end -->
+<!-- rnb-text-begin -->
+</div>
+<div id="visualizing-sentiment-over-time" class="section level2">
+<h2>Visualizing sentiment over time</h2>
+<p>You have compared how TV stations use positive and negative words; now it is time to see how sentiment is changing over time. Are TV news stations using more negative words as time passes? More positive words? You will use a function called <code>floor_date()</code> from the <code>lubridate</code> package to count uses of positive and negative words over time.</p>
+<p>The <code>tidy_tv</code> dataframe you created near the beginning of this chapter is available in your environment.</p>
+<div id="instructions-23" class="section level4">
+<h4>Instructions</h4>
+<ul>
+<li>Load the <code>lubridate</code> package.</li>
+<li>Define the new column with a <code>mutate()</code> statement using the <code>floor_date()</code> function, rounding each date down to the nearest 6-month unit.</li>
+<li>Group by the new <code>date</code> column (each 6 months).</li>
+<li>Implement sentiment analysis using the correct kind of join and the <code>&quot;nrc&quot;</code> sentiment lexicon.</li>
+</ul>
+<p>Now you have a dataframe with the number of words per sentiment per 6 months, as well as the total words used in each 6 months!</p>
+<ul>
+<li>Filter for both positive and negative words so you can plot both.</li>
+<li>Count with three arguments: date, sentiment, and the total number of words.</li>
+<li>Set up your plot with <code>aes()</code> and put date on the x-axis, percent on the y-axis, and have color correspond to sentiment.</li>
+</ul>
+<!-- rnb-text-end -->
+<!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjpbImxpYnJhcnkobHVicmlkYXRlKSIsIiIsInNlbnRpbWVudF9ieV90aW1lIDwtIHRpZHlfdHYgJT4lICIsIiAgbXV0YXRlKGRhdGUgPSBmbG9vcl9kYXRlKHggPSBzaG93X2RhdGUsIHVuaXQgPSBcIjYgbW9udGhzXCIpKSAlPiUgIiwiICBncm91cF9ieShkYXRlKSAlPiUgIiwiICBtdXRhdGUodG90YWxfd29yZHMgPSBuKCkpICU+JSAiLCIgIHVuZ3JvdXAoKSAlPiUgIiwiICBpbm5lcl9qb2luKGdldF9zZW50aW1lbnRzKFwibnJjXCIpKSIsIiIsInNlbnRpbWVudF9ieV90aW1lICU+JSAiLCIgIGZpbHRlcihzZW50aW1lbnQgPT0gXCJwb3NpdGl2ZVwiIHwgc2VudGltZW50ID09IFwibmVnYXRpdmVcIikgJT4lICIsIiAgY291bnQoZGF0ZSwgc2VudGltZW50LCB0b3RhbF93b3JkcykgJT4lICIsIiAgdW5ncm91cCgpICU+JSAiLCIgIG11dGF0ZShwZXJjZW50ID0gbiAvIHRvdGFsX3dvcmRzKSAlPiUgIiwiICBnZ3Bsb3QoYWVzKHggPSBkYXRlLCB5ID0gcGVyY2VudCwgY29sID0gc2VudGltZW50KSkgKyIsIiAgZ2VvbV9saW5lKHNpemUgPSAxLjUpICsiLCIgIGdlb21fc21vb3RoKG1ldGhvZCA9IFwibG1cIiwgc2UgPSBGLCBsdHkgPSAyKSArIiwiICBleHBhbmRfbGltaXRzKHkgPSAwKSJdfQ== -->
+<pre class="r"><code>library(lubridate)
+
+sentiment_by_time &lt;- tidy_tv %&gt;% 
+  mutate(date = floor_date(x = show_date, unit = &quot;6 months&quot;)) %&gt;% 
+  group_by(date) %&gt;% 
+  mutate(total_words = n()) %&gt;% 
+  ungroup() %&gt;% 
+  inner_join(get_sentiments(&quot;nrc&quot;))
+
+sentiment_by_time %&gt;% 
+  filter(sentiment == &quot;positive&quot; | sentiment == &quot;negative&quot;) %&gt;% 
+  count(date, sentiment, total_words) %&gt;% 
+  ungroup() %&gt;% 
+  mutate(percent = n / total_words) %&gt;% 
+  ggplot(aes(x = date, y = percent, col = sentiment)) +
+  geom_line(size = 1.5) +
+  geom_smooth(method = &quot;lm&quot;, se = F, lty = 2) +
+  expand_limits(y = 0)</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-chunk-end -->
+<!-- rnb-text-begin -->
+</div>
+</div>
+<div id="word-changes-over-time" class="section level2">
+<h2>Word changes over time</h2>
+<p>You can also use tidy data principles to explore how individual words have been used over time. In the final exercise of this chapter, you will take the <code>tidy_tv</code> dataframe you created earlier and make a plot to see how certain words used in the context of climate change have changed in use over time. You will again use the <code>floor_date()</code> function, but this time to count monthly uses of words.</p>
+<div id="instructions-24" class="section level4">
+<h4>Instructions</h4>
+<ul>
+<li>Define a new column within the <code>mutate()</code> statement with the <code>floor_date()</code> function, rounding each date down to the nearest 1-month unit.</li>
+<li>Count with 2 arguments: <code>date</code> and <code>word</code>.</li>
+<li>Set up your plot with <code>aes()</code> so that <code>date</code> is on the x-axis, <code>n</code> (the monthly number of uses) is on the y-axis), and color corresponds to <code>word</code>.</li>
+<li>Use <code>facet_wrap</code> to make a separate panel in your plot for each word.</li>
+</ul>
+<!-- rnb-text-end -->
+<!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjpbInRpZHlfdHYgJT4lICIsIiAgbXV0YXRlKGRhdGUgPSBmbG9vcl9kYXRlKHNob3dfZGF0ZSwgdW5pdCA9IFwiMSBtb250aFwiKSkgJT4lICIsIiAgZmlsdGVyKHdvcmQgJWluJSBjKFwidGhyZWF0XCIsIFwiaG9heFwiLCBcImRlbmllclwiLCBcInJlYWxcIiwgXCJ3YXJtaW5nXCIsIFwiaHVycmljYW5lXCIpKSAlPiUgIiwiICBjb3VudChkYXRlLCB3b3JkKSAlPiUgIiwiICB1bmdyb3VwKCkgJT4lICIsIiAgZ2dwbG90KGFlcyh4ID0gZGF0ZSwgeSA9IG4sIGNvbCA9IHdvcmQpKSArIiwiICBnZW9tX2xpbmUoc2l6ZSA9IDEuNSwgc2hvdy5sZWdlbmQgPSBGQUxTRSkgKyIsIiAgZmFjZXRfd3JhcCggfiB3b3JkKSArIiwiICBleHBhbmRfbGltaXRzKHkgPSAwKSJdfQ== -->
+<pre class="r"><code>tidy_tv %&gt;% 
+  mutate(date = floor_date(show_date, unit = &quot;1 month&quot;)) %&gt;% 
+  filter(word %in% c(&quot;threat&quot;, &quot;hoax&quot;, &quot;denier&quot;, &quot;real&quot;, &quot;warming&quot;, &quot;hurricane&quot;)) %&gt;% 
+  count(date, word) %&gt;% 
+  ungroup() %&gt;% 
+  ggplot(aes(x = date, y = n, col = word)) +
+  geom_line(size = 1.5, show.legend = FALSE) +
+  facet_wrap( ~ word) +
+  expand_limits(y = 0)</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-chunk-end -->
+<!-- rnb-text-begin -->
+</div>
+</div>
+</div>
+<div id="th-segment---singing-a-happy-song-or-sad" class="section level1">
+<h1>4th Segment - Singing a Happy Song (or Sad?!)</h1>
+<div id="tidying-song-lyrics" class="section level2">
+<h2>Tidying song lyrics</h2>
+<p>Let’s take a look at the dataset you will use in this final chapter to practice your sentiment analysis skills. The <code>song_lyrics</code> dataset contains five columns:</p>
+<ul>
+<li><code>rank</code>, the rank a song achieved on the Billboard Year-End Hot 100,</li>
+<li><code>song</code>, the song’s title,</li>
+<li><code>artist</code>, the artist who recorded the song,</li>
+<li><code>year</code>, the year the song reached the given rank on the Billboard chart, and</li>
+<li><code>lyrics</code>, the lyrics of the song.</li>
+</ul>
+<p>This dataset contains over 5000 songs, from 1965 to the present. The lyrics are all in one column, so they are not yet in a tidy format, ready for analysis using tidy tools. It’s your turn to tidy this text data!</p>
+<div id="instructions-25" class="section level4">
+<h4>Instructions</h4>
+<ul>
+<li>Load the <code>tidytext</code> package.</li>
+<li>Pipe the <code>song_lyrics</code> object to the next line.</li>
+<li>Use <code>unnest_tokens()</code> to unnest the lyrics column into a new <code>word</code> column.</li>
+</ul>
+<!-- rnb-text-end -->
+<!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjpbIiMgZGF0YSBwcmVwIiwibG9hZChcIi9Vc2Vycy9sYmFyY2Vsby9SX1JlcG8vRGF0YUNhbXAvU2VudGltZW50IEFuYWx5c2lzIGluIFI6IFRoZSBUaWR5IFdheS9EYXRhL3NvbmdfbHlyaWNzLnJkYVwiKSIsIiIsImxpYnJhcnkodGlkeXRleHQpIiwidGlkeV9seXJpY3MgPC0gc29uZ19seXJpY3MgJT4lICIsIiAgdW5uZXN0X3Rva2VucyhpbnB1dCA9IGx5cmljcywgd29yZCkiXX0= -->
+<pre class="r"><code># data prep
+load(&quot;/Users/lbarcelo/R_Repo/DataCamp/Sentiment Analysis in R: The Tidy Way/Data/song_lyrics.rda&quot;)
+
+library(tidytext)
+tidy_lyrics &lt;- song_lyrics %&gt;% 
+  unnest_tokens(input = lyrics, word)</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-chunk-end -->
+<!-- rnb-text-begin -->
+</div>
+</div>
+<div id="calculating-total-words-per-song" class="section level2">
+<h2>Calculating total words per song</h2>
+<p>For some next steps in this analysis, you need to know the total number of words sung in each song. Use <code>count()</code> to count up the words per song, and then <code>left_join()</code> these word totals to the tidy data set. You can specify exactly which column to use when joining the two data frames if you add <code>by = &quot;song&quot;</code>.</p>
+<div id="instructions-26" class="section level4">
+<h4>Instructions</h4>
+<ul>
+<li>Count by song to find the word totals.</li>
+<li>With the <code>rename()</code> function, change the name of the new <code>n</code> column to <code>total_words</code>.</li>
+<li>Use <code>left_join()</code> to combine total with <code>tidy_lyrics</code> using the <code>song</code> column.</li>
+</ul>
+<!-- rnb-text-end -->
+<!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjpbInRvdGFscyA8LSB0aWR5X2x5cmljcyAlPiUiLCIgIGNvdW50KHNvbmcpICU+JSAiLCIgIHJlbmFtZSh0b3RhbF93b3JkcyA9IG4pIiwiIiwidG90YWxzIiwiIiwibHlyaWNfY291bnRzIDwtIHRpZHlfbHlyaWNzICU+JSAiLCIgIGxlZnRfam9pbih0b3RhbHMsIGJ5ID0gYyhcInNvbmdcIiA9IFwic29uZ1wiKSkiXX0= -->
+<pre class="r"><code>totals &lt;- tidy_lyrics %&gt;%
+  count(song) %&gt;% 
+  rename(total_words = n)
+
+totals
+
+lyric_counts &lt;- tidy_lyrics %&gt;% 
+  left_join(totals, by = c(&quot;song&quot; = &quot;song&quot;))</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-chunk-end -->
+<!-- rnb-text-begin -->
+</div>
+</div>
+<div id="sentiment-analysis-on-song-lyrics" class="section level2">
+<h2>Sentiment analysis on song lyrics</h2>
+<p>You have been practicing how to implement sentiment analysis with a join throughout this course. After transforming the text of these songs to a tidy text dataset and preparing the data frame, the resulting data frame <code>lyric_counts</code> is ready for you to perform sentiment analysis once again. Once you have done the sentiment analysis, you can learn which songs have the most sentiment words from the NRC lexicon. Remember that the NRC lexicon has 10 categories of sentiment:</p>
+<ul>
+<li>anger</li>
+<li>anticipation</li>
+<li>disgust</li>
+<li>fear</li>
+<li>joy</li>
+<li>negative</li>
+<li>positive</li>
+<li>sadness</li>
+<li>surprise</li>
+<li><p>trust</p></li>
+<li>Use the correct kind of join to implement sentiment analysis.</li>
+<li>Add the <code>&quot;nrc&quot;</code> lexicon as the argument to the join function.</li>
+<li><p>Find the songs with the most sentiment words by using two arguments in <code>count()</code>, along with <code>sort = TRUE</code></p></li>
+</ul>
+<!-- rnb-text-end -->
+<!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjpbImx5cmljX3NlbnRpbWVudCA8LSBseXJpY19jb3VudHMgJT4lICIsIiAgaW5uZXJfam9pbihnZXRfc2VudGltZW50cyhcIm5yY1wiKSkgIiwiIiwibHlyaWNfc2VudGltZW50ICU+JSAiLCIgIGNvdW50KHNvbmcsIHNlbnRpbWVudCwgc29ydCA9IFQpIl19 -->
+<pre class="r"><code>lyric_sentiment &lt;- lyric_counts %&gt;% 
+  inner_join(get_sentiments(&quot;nrc&quot;)) 
+
+lyric_sentiment %&gt;% 
+  count(song, sentiment, sort = T)</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-chunk-end -->
+<!-- rnb-text-begin -->
+</div>
+<div id="the-most-positive-and-negative-songs" class="section level2">
+<h2>The most positive and negative songs</h2>
+<p>You have successfully implemented sentiment analysis on this dataset of song lyrics, and now you can ask question such as, “Which songs have the highest proportion of positive words? Of negative words?” You calculated the total number of words for each song earlier, so now you need to count the number of words for each sentiment and song.</p>
+<div id="instructions-27" class="section level4">
+<h4>Instructions</h4>
+<ul>
+<li>Use <code>count()</code> with three arguments to find the number of sentiment words for each song and total number of words.</li>
+<li>Make a new column using <code>mutate()</code> that is named percent, equal to <code>n</code> (the output of <code>count()</code>) divided by the <code>total number of words</code>.</li>
+<li>Filter for only negative words.</li>
+<li>Arrange by descending <code>percent</code>.</li>
+</ul>
+<p>Now repeat these same steps for positive words.</p>
+<!-- rnb-text-end -->
+<!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjpbImx5cmljX3NlbnRpbWVudCAlPiUgIiwiICBjb3VudChzb25nLCBzZW50aW1lbnQsIHRvdGFsX3dvcmRzKSAlPiUgIiwiICB1bmdyb3VwKCkgJT4lICIsIiAgbXV0YXRlKHBlcmNlbnQgPSBuIC8gdG90YWxfd29yZHMpICU+JSAiLCIgIGZpbHRlcihzZW50aW1lbnQgPT0gXCJuZWdhdGl2ZVwiKSAlPiUgIiwiICBhcnJhbmdlKGRlc2MocGVyY2VudCkpIiwiIiwibHlyaWNfc2VudGltZW50ICU+JSAiLCIgIGNvdW50KHNvbmcsIHNlbnRpbWVudCwgdG90YWxfd29yZHMpICU+JSAiLCIgIHVuZ3JvdXAoKSAlPiUgIiwiICBtdXRhdGUocGVyY2VudCA9IG4gLyB0b3RhbF93b3JkcykgJT4lICIsIiAgZmlsdGVyKHNlbnRpbWVudCA9PSBcInBvc2l0aXZlXCIpICU+JSAiLCIgIGFycmFuZ2UoZGVzYyhwZXJjZW50KSkiXX0= -->
+<pre class="r"><code>lyric_sentiment %&gt;% 
+  count(song, sentiment, total_words) %&gt;% 
+  ungroup() %&gt;% 
+  mutate(percent = n / total_words) %&gt;% 
+  filter(sentiment == &quot;negative&quot;) %&gt;% 
+  arrange(desc(percent))
+
+lyric_sentiment %&gt;% 
+  count(song, sentiment, total_words) %&gt;% 
+  ungroup() %&gt;% 
+  mutate(percent = n / total_words) %&gt;% 
+  filter(sentiment == &quot;positive&quot;) %&gt;% 
+  arrange(desc(percent))</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-chunk-end -->
+<!-- rnb-text-begin -->
+</div>
+</div>
+<div id="sentiment-and-billboard-rank" class="section level2">
+<h2>Sentiment and Billboard rank</h2>
+<p>The <code>lyric_sentiment</code> data frame that you created earlier by using <code>inner_join()</code> is available in your environment. You can now explore how the sentiment score of a song is related to other aspects of that song. First, start with Billboard rank, how high on the annual Billboard chart the song reached. Do songs that use more positive or negative words achieve higher or lower ranks? Start with positive words, and make a visualization to see how these characteristics are related.</p>
+<div id="instructions-28" class="section level4">
+<h4>Instructions</h4>
+<ul>
+<li>Count with three arguments: song, Billboard rank, and the total number of words that you calculated before</li>
+<li>Use the correct <code>dplyr</code> function to make two new columns, <code>percent</code> and a rounded version of <code>rank</code></li>
+<li>Call the correct <code>ggplot2</code> <code>geom_*</code> to make a boxplot</li>
+</ul>
+<!-- rnb-text-end -->
+<!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjpbImx5cmljX3NlbnRpbWVudCAlPiUgIiwiICBmaWx0ZXIoc2VudGltZW50ID09IFwicG9zaXRpdmVcIikgJT4lICIsIiAgY291bnQoc29uZywgcmFuaywgdG90YWxfd29yZHMpICU+JSAiLCIgIHVuZ3JvdXAoKSAlPiUgIiwiICBtdXRhdGUocGVyY2VudCA9IG4gLyB0b3RhbF93b3JkcywgcmFuayA9IDEwICogZmxvb3IocmFuayAvIDEwKSkgJT4lICIsIiAgZ2dwbG90KGFlcyhhcy5mYWN0b3IocmFuayksIHBlcmNlbnQpKSArIiwiICBnZW9tX2JveHBsb3QoKSJdfQ== -->
+<pre class="r"><code>lyric_sentiment %&gt;% 
+  filter(sentiment == &quot;positive&quot;) %&gt;% 
+  count(song, rank, total_words) %&gt;% 
+  ungroup() %&gt;% 
+  mutate(percent = n / total_words, rank = 10 * floor(rank / 10)) %&gt;% 
+  ggplot(aes(as.factor(rank), percent)) +
+  geom_boxplot()</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-chunk-end -->
+<!-- rnb-text-begin -->
+</div>
+</div>
+<div id="more-on-billboard-rank-and-sentiment-scores" class="section level2">
+<h2>More on Billboard rank and sentiment scores</h2>
+<p>In the last exercise, you explored how positive sentiment and Billboard rank are related using a visualization, and you found that there was no visible trend. Songs with more positive words do not reach higher or lower ranks on the Billboard chart. Next, check the same relationship using the same visualization but for negative words. The <code>lyric_sentiment</code> data frame that you created earlier is still available in your environment.</p>
+<div id="instructions-29" class="section level4">
+<h4>Instructions</h4>
+<ul>
+<li>Filter for only negative words.</li>
+<li>Count using three arguments: <code>song</code>, Billboard rank, and total number of words.</li>
+<li>Define a new percent column with <code>mutate()</code> that is equal to <code>n</code> divided by <code>total_words</code>.</li>
+</ul>
+<p>Then use <code>ggplot2</code> to make your visualization.</p>
+<!-- rnb-text-end -->
+<!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjpbImx5cmljX3NlbnRpbWVudCAlPiUgIiwiICBmaWx0ZXIoc2VudGltZW50ID09IFwibmVnYXRpdmVcIikgJT4lICIsIiAgY291bnQoc29uZywgcmFuaywgdG90YWxfd29yZHMpICU+JSAiLCIgIHVuZ3JvdXAoKSAlPiUgIiwiICBtdXRhdGUocGVyY2VudCA9IG4gLyB0b3RhbF93b3JkcywgcmFuayA9IDEwICogZmxvb3IocmFuayAvIDEwKSkgJT4lIiwiICBhcnJhbmdlKGRlc2MocGVyY2VudCkpICU+JSAiLCIgIGdncGxvdChhZXMoeCA9IGFzLmZhY3RvcihyYW5rKSwgeSA9IHBlcmNlbnQpKSArIiwiICBnZW9tX2JveHBsb3QoKSJdfQ== -->
+<pre class="r"><code>lyric_sentiment %&gt;% 
+  filter(sentiment == &quot;negative&quot;) %&gt;% 
+  count(song, rank, total_words) %&gt;% 
+  ungroup() %&gt;% 
+  mutate(percent = n / total_words, rank = 10 * floor(rank / 10)) %&gt;%
+  arrange(desc(percent)) %&gt;% 
+  ggplot(aes(x = as.factor(rank), y = percent)) +
+  geom_boxplot()</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-chunk-end -->
+<!-- rnb-text-begin -->
+</div>
+</div>
+<div id="sentiment-scores-by-year" class="section level2">
+<h2>Sentiment scores by year</h2>
+<p>You are going to make two more exploratory plots in this exercise, much like the plots you made for Billboard rank. This time, you are going to explore how sentiment has been changing with time. Are songs on the Billboard chart changing in their use of negative or positive words through the decades?</p>
+<div id="instructions-30" class="section level4">
+<h4>Instructions</h4>
+<ul>
+<li>Filter for only negative words.</li>
+<li>Use <code>count()</code> with three arguments to find the number of sentiment words for each song, year, and total number of words.</li>
+<li>Use <code>ggplot()</code> to set up a plot with year on the x-axis (remember to treat it as a factor with <code>as.factor(year)</code>) and percent on the y-axis.</li>
+</ul>
+<p>Now repeat these same steps for positive words.</p>
+<!-- rnb-text-end -->
+<!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjpbImx5cmljX3NlbnRpbWVudCAlPiUgIiwiICBmaWx0ZXIoc2VudGltZW50ID09IFwibmVnYXRpdmVcIikgJT4lICIsIiAgY291bnQoc29uZywgeWVhciwgdG90YWxfd29yZHMpICU+JSAiLCIgIHVuZ3JvdXAoKSAlPiUgIiwiICBtdXRhdGUocGVyY2VudCA9IG4gLyB0b3RhbF93b3JkcywgeWVhciA9IDEwICogZmxvb3IoeWVhciAvIDEwKSkgJT4lICIsIiAgZ2dwbG90KGFlcyh4ID0gYXMuZmFjdG9yKHllYXIpLCB5ID0gcGVyY2VudCkpICsiLCIgIGdlb21fYm94cGxvdCgpIiwiIiwibHlyaWNfc2VudGltZW50ICU+JSAiLCIgIGZpbHRlcihzZW50aW1lbnQgPT0gXCJwb3NpdGl2ZVwiKSAlPiUgIiwiICBjb3VudChzb25nLCB5ZWFyLCB0b3RhbF93b3JkcykgJT4lICIsIiAgdW5ncm91cCgpICU+JSAiLCIgIG11dGF0ZShwZXJjZW50ID0gbiAvIHRvdGFsX3dvcmRzLCB5ZWFyID0gMTAgKiBmbG9vcih5ZWFyIC8gMTApKSAlPiUgIiwiICBnZ3Bsb3QoYWVzKHggPSBhcy5mYWN0b3IoeWVhciksIHkgPSBwZXJjZW50KSkgKyIsIiAgZ2VvbV9ib3hwbG90KCkiXX0= -->
+<pre class="r"><code>lyric_sentiment %&gt;% 
+  filter(sentiment == &quot;negative&quot;) %&gt;% 
+  count(song, year, total_words) %&gt;% 
+  ungroup() %&gt;% 
+  mutate(percent = n / total_words, year = 10 * floor(year / 10)) %&gt;% 
+  ggplot(aes(x = as.factor(year), y = percent)) +
+  geom_boxplot()
+
+lyric_sentiment %&gt;% 
+  filter(sentiment == &quot;positive&quot;) %&gt;% 
+  count(song, year, total_words) %&gt;% 
+  ungroup() %&gt;% 
+  mutate(percent = n / total_words, year = 10 * floor(year / 10)) %&gt;% 
+  ggplot(aes(x = as.factor(year), y = percent)) +
+  geom_boxplot()</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-chunk-end -->
+<!-- rnb-text-begin -->
+</div>
+</div>
+<div id="modeling-negative-sentiment" class="section level2">
+<h2>Modeling negative sentiment</h2>
+<p>You saw in your visualizations in the last exercise how positive and negative sentiment appear to be related to year. Now, you can explore that relationship with linear modeling. One more time, make a dataframe with one row per song that contains the proportion of negative words. Then, build a linear model and see whether the relationship is significant. The <code>lyric_sentiment</code> data frame that you created earlier is still available in your environment.</p>
+<div id="instructions-31" class="section level4">
+<h4>Instructions</h4>
+<ul>
+<li><code>Filter</code> for only negative words</li>
+<li>Use <code>mutate()</code> to define a new percent column that is <code>n</code> divided by <code>total_words</code></li>
+<li>When fitting the linear model with <code>lm()</code>, <code>percent</code> will be your response and <code>year</code> will be your predictor.</li>
+<li>To see the results of your model fitting, call <code>summary</code> on your model fit object</li>
+</ul>
+<!-- rnb-text-end -->
+<!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjpbIm5lZ2F0aXZlX2J5X3llYXIgPC0gbHlyaWNfc2VudGltZW50ICU+JSAiLCIgIGZpbHRlcihzZW50aW1lbnQgPT0gXCJuZWdhdGl2ZVwiKSAlPiUgIiwiICBjb3VudChzb25nLCB5ZWFyLCB0b3RhbF93b3JkcykgJT4lICIsIiAgdW5ncm91cCgpICU+JSAiLCIgIG11dGF0ZShwZXJjZW50ID0gbiAvIHRvdGFsX3dvcmRzKSIsIiIsIm1vZGVsX25lZ2F0aXZlIDwtIGxtKHBlcmNlbnQgfiB5ZWFyLCBkYXRhID0gbmVnYXRpdmVfYnlfeWVhcikiLCIiLCJzdW1tYXJ5KG1vZGVsX25lZ2F0aXZlKSJdfQ== -->
+<pre class="r"><code>negative_by_year &lt;- lyric_sentiment %&gt;% 
+  filter(sentiment == &quot;negative&quot;) %&gt;% 
+  count(song, year, total_words) %&gt;% 
+  ungroup() %&gt;% 
+  mutate(percent = n / total_words)
+
+model_negative &lt;- lm(percent ~ year, data = negative_by_year)
+
+summary(model_negative)</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-chunk-end -->
+<!-- rnb-text-begin -->
+</div>
+</div>
+<div id="modeling-positive-sentiment" class="section level2">
+<h2>Modeling positive sentiment</h2>
+<p>Now it’s time for you to build a linear model for positive sentiment in this dataset of pop songs, just like you did for negative sentiment in the last exercise. Use the same approach and see what the results are!</p>
+<div id="instructions-32" class="section level4">
+<h4>Instructions</h4>
+<ul>
+<li><code>Count</code> using three arguments: <code>song</code>, <code>year</code>, and total number of words.</li>
+<li>Use <code>mutate()</code> to define a new <code>percent</code> column that is <code>n</code> divided by <code>total_words</code></li>
+<li>Specify a linear model with <code>lm()</code> in the same way as the last exercise, but with <code>data = positive_by_year</code> this time.</li>
+<li>Explore the results of the model fitting with <code>summary()</code></li>
+</ul>
+<!-- rnb-text-end -->
+<!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjoiZGV2dG9vbHM6Omluc3RhbGxfZ2l0aHViKFwiYWJyZXNsZXIvZ2RlbHRyMlwiKSJ9 -->
+<pre class="r"><code>devtools::install_github(&quot;abresler/gdeltr2&quot;)</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-chunk-end -->
+<!-- rnb-text-begin -->
 <!-- rnb-text-end -->
 </div>
 </div>
 </div>
 
-<div id="rmd-source-code">LS0tCnRpdGxlOiAiU2VudGltZW50IEFuYWx5c2lzIGluIFI6IFRoZSBUaWR5IFdheSIKc3VidGl0bGU6ICJEYXRhQ2FtcCBjb3Vyc2UgYnkgSnVsaWEgU2lsZ2UiCmF1dGhvcjogIkxhdXJlbnQgQmFyY2VsbyIKZGF0ZTogIlNlcHRlbWJlciwgMjIsIDIwMTgiCm91dHB1dDogCiAgaHRtbF9ub3RlYm9vazoKICAgIHRvYzogVFJVRQogICAgdG9jX2RlcHRoOiAyCi0tLQoKYGBge3Igc2V0dXAsIGluY2x1ZGU9RkFMU0V9CmtuaXRyOjpvcHRzX2NodW5rJHNldChldmFsID0gRikKYGBgCgojIDFzdCBTZWdtZW50IC0gVHdlZXRzIGFjcm9zcyB0aGUgVW5pdGVkIFN0YXRlcwoKIyMgU2VudGltZW50IGxleGljb25zCgpUaGVyZSBhcmUgc2V2ZXJhbCBkaWZmZXJlbnQgKipzZW50aW1lbnQgbGV4aWNvbnMqKiBhdmFpbGFibGUgZm9yIHNlbnRpbWVudCBhbmFseXNpcy4gWW91IHdpbGwgZXhwbG9yZSB0aHJlZSBpbiB0aGlzIGNvdXJzZSB0aGF0IGFyZSBhdmFpbGFibGUgaW4gdGhlIGB0aWR5dGV4dGAgcGFja2FnZToKCiogYGFmaW5uYCBmcm9tIEZpbm4gw4VydXAgTmllbHNlbiwKKiBgYmluZ2AgZnJvbSBCaW5nIExpdSBhbmQgY29sbGFib3JhdG9ycywgYW5kCiogYG5yY2AgZnJvbSBTYWlmIE1vaGFtbWFkIGFuZCBQZXRlciBUdXJuZXkuCgpZb3Ugd2lsbCBzZWUgaG93IHRoZXNlIGxleGljb25zIGNhbiBiZSB1c2VkIGFzIHlvdSB3b3JrIHRocm91Z2ggdGhpcyBjb3Vyc2UuIFRoZSBkZWNpc2lvbiBhYm91dCB3aGljaCBsZXhpY29uIHRvIHVzZSBvZnRlbiBkZXBlbmRzIG9uIHdoYXQgcXVlc3Rpb24geW91IGFyZSB0cnlpbmcgdG8gYW5zd2VyLgpJbiB0aGlzIGV4ZXJjaXNlLCB5b3Ugd2lsbCB1c2UgYGRwbHlyYCdzIGBjb3VudCgpYCBmdW5jdGlvbi4gSWYgeW91IHBhc3MgYGNvdW50KClgIGEgdmFyaWFibGUsIGl0IHdpbGwgY291bnQgdGhlIG51bWJlciBvZiByb3dzIHRoYXQgc2hhcmUgZWFjaCBkaXN0aW5jdCB2YWx1ZSBvZiB0aGF0IHZhcmlhYmxlLgoKIyMjIyBJbnN0cnVjdGlvbnMKKiBMb2FkIHRoZSBgZHBseXJgIGFuZCBgdGlkeXRleHRgIHBhY2thZ2VzLgoqIEFkZCBhbiBhcmd1bWVudCB0byBgZ2V0X3NlbnRpbWVudHMoKWAgdG8gc2VlIHdoYXQgdGhlIGAiYmluZyJgIGxleGljb24gbG9va3MgbGlrZS4KKiBUaGVuIGNhbGwgYGdldF9zZW50aW1lbnRzKClgIGZvciB0aGUgYCJucmMiYCBsZXhpY29uLgoqIEFkZCBhbiBhcmd1bWVudCB0byBgY291bnQoKWAgc28geW91IGNhbiBzZWUgaG93IG1hbnkgd29yZHMgdGhlIGBucmNgIGxleGljb24gaGFzIGZvciBlYWNoIHNlbnRpbWVudCBjYXRlZ29yeS4KCmBgYHtyfQpsaWJyYXJ5KGRwbHlyKQpsaWJyYXJ5KHRpZHl0ZXh0KQoKZ2V0X3NlbnRpbWVudHMoImJpbmciKQpnZXRfc2VudGltZW50cygibnJjIikKCmdldF9zZW50aW1lbnRzKCJucmMiKSAlPiUgCiAgZ3JvdXBfYnkoc2VudGltZW50KSAlPiUgCiAgY291bnQoKQoKZ2V0X3NlbnRpbWVudHMoIm5yYyIpICU+JSBjb3VudChzZW50aW1lbnQpCgpgYGAKCiMjIEltcGxlbWVudCBhbiBpbm5lciBqb2luCgpJbiB0aGlzIGV4ZXJjaXNlIHlvdSB3aWxsIGltcGxlbWVudCBzZW50aW1lbnQgYW5hbHlzaXMgdXNpbmcgYW4gaW5uZXIgam9pbi4gVGhlIGBpbm5lcl9qb2luKClgIGZ1bmN0aW9uIGZyb20gZHBseXIgd2lsbCBpZGVudGlmeSB3aGljaCB3b3JkcyBhcmUgaW4gYm90aCB0aGUgc2VudGltZW50IGxleGljb24gYW5kIHRoZSB0ZXh0IGRhdGFzZXQgeW91IGFyZSBleGFtaW5pbmcuIFRvIGxlYXJuIG1vcmUgYWJvdXQgam9pbmluZyBkYXRhIGZyYW1lcyB1c2luZyBkcGx5ciwgY2hlY2sgb3V0IEpvaW5pbmcgRGF0YSBpbiBSIHdpdGggYGRwbHlyYC4KClRoZSBgZ2VvY29kZWRfdHdlZXRzYCBkYXRhc2V0IGlzIHRha2VuIGZyb20gUXVhcnR6IGFuZCBjb250YWlucyB0aHJlZSBjb2x1bW5zOgoKKiBgc3RhdGVgLCBhIHN0YXRlIGluIHRoZSBVbml0ZWQgU3RhdGVzCiogYHdvcmRgLCBhIHdvcmQgdXNlZCBpbiB0d2VldHMgcG9zdGVkIG9uIFR3aXR0ZXIKKiBgZnJlcWAsIHRoZSBhdmVyYWdlIGZyZXF1ZW5jeSBvZiB0aGF0IHdvcmQgaW4gdGhhdCBzdGF0ZSAocGVyIGJpbGxpb24gd29yZHMpCgpJZiB5b3UgbG9vayBhdCB0aGlzIGRhdGFzZXQgaW4gdGhlIGNvbnNvbGUsIHlvdSB3aWxsIG5vdGljZSB0aGF0IHRoZSB3b3JkICJhIiBoYXMgYSBoaWdoIGZyZXF1ZW5jeSBjb21wYXJlZCB0byB0aGUgb3RoZXIgd29yZHMgbmVhciB0aGUgdG9wIG9mIHRoZSBzb3J0ZWQgZGF0YSBmcmFtZTsgdGhpcyBtYWtlcyBzZW5zZSEgWW91IGNhbiB1c2UgYGlubmVyX2pvaW4oKWAgdG8gaW1wbGVtZW50IGEgc2VudGltZW50IGFuYWx5c2lzIG9uIHRoaXMgZGF0YXNldCBiZWNhdXNlIGl0IGlzIGluIGEgdGlkeSBmb3JtYXQuCgojIyMjIEluc3RydWN0aW9ucwoqIEluIHRoZSBjb25zb2xlLCB0YWtlIGEgbG9vayBhdCB0aGUgYGdlb2NvZGVkX3R3ZWV0c2Agb2JqZWN0LgoqIFVzZSBgZ2V0X3NlbnRpbWVudHMoKWAgdG8gYWNjZXNzIHRoZSBgImJpbmciYCBsZXhpY29uIGFuZCBhc3NpZ24gaXQgdG8gYmluZy4KKiBVc2UgYW4gYGlubmVyX2pvaW4oKWAgdG8gaW1wbGVtZW50IHNlbnRpbWVudCBhbmFseXNpcyBvbiB0aGUgZ2VvY29kZWQgdHdlZXQgZGF0YSB1c2luZyB0aGUgYGJpbmdgIGxleGljb24uCgpgYGB7ciBldmFsID0gRn0KbG9hZCgiL1VzZXJzL2xiYXJjZWxvL1JfUmVwby9EYXRhQ2FtcC9TZW50aW1lbnQgQW5hbHlzaXMgaW4gUjogVGhlIFRpZHkgV2F5L0RhdGEvZ2VvY29kZWRfdHdlZXRzLnJkYSIpCgpoZWFkKGdlb2NvZGVkX3R3ZWV0cykKYmluZyA8LSBnZXRfc2VudGltZW50cyhsZXhpY29uID0gImJpbmciKQp0d2VldHNfYmluZyA8LSBnZW9jb2RlZF90d2VldHMgJT4lIGlubmVyX2pvaW4oYmluZykKYGBgCgojIyBXaGF0IGFyZSB0aGUgbW9zdCBjb21tb24gc2FkbmVzcyB3b3Jkcz8KCkFmdGVyIHlvdSBoYXZlIGltcGxlbWVudGVkIHNlbnRpbWVudCBhbmFseXNpcyB1c2luZyBgaW5uZXJfam9pbigpYCwgeW91IGNhbiB1c2UgYGRwbHlyYCBmdW5jdGlvbnMgc3VjaCBhcyBgZ3JvdXBfYnkoKWAgYW5kIGBzdW1tYXJpemUoKWAgdG8gdW5kZXJzdGFuZCB5b3VyIHJlc3VsdHMuIEZvciBleGFtcGxlLCB3aGF0IGFyZSB0aGUgbW9zdCBjb21tb24gd29yZHMgcmVsYXRlZCB0byBzYWRuZXNzIGluIHRoaXMgVHdpdHRlciBkYXRhc2V0PwoKIyMjIyBJbnN0cnVjdGlvbnMKVGFrZSBhIGxvb2sgYXQgdGhlIGB0d2VldHNfbnJjYCBvYmplY3QsIHRoZSBvdXRwdXQgb2YgYW4gYGlubmVyIGpvaW5gIGp1c3QgbGlrZSB0aGUgb25lIHlvdSBkaWQgaW4gdGhlIGxhc3QgZXhlcmNpc2UuIFRoZW4gbWFuaXB1bGF0ZSBpdCB0byBmaW5kIHRoZSBtb3N0IGNvbW1vbiB3b3JkcyB0aGF0IGFyZSByZWxhdGVkIHRvIHNhZG5lc3MuCgoqIEZpbHRlciBvbmx5IHRoZSByb3dzIHRoYXQgaGF2ZSB3b3JkcyBhc3NvY2lhdGVkIHdpdGggc2FkbmVzcy4KKiBHcm91cCBieSB3b3JkIHRvIGZpbmQgdGhlIGF2ZXJhZ2UgYWNyb3NzIHRoZSBVbml0ZWQgU3RhdGVzLgoqIFVzZSB0aGUgYHN1bW1hcml6ZSgpYCBhbmQgYGFycmFuZ2UoKWAgdmVyYnMgZmluZCB0aGUgYXZlcmFnZSBmcmVxdWVuY3kgZm9yIGVhY2ggd29yZCwgYW5kIHRoZW4gc29ydC4KKiBCZSBhd2FyZSB0aGF0IHRoaXMgaXMgcmVhbCBkYXRhIGZyb20gVHdpdHRlciBhbmQgdGhlcmUgaXMgc29tZSB1c2Ugb2YgcHJvZmFuaXR5OyB0aGUgc2VudGltZW50IGxleGljb25zIGluY2x1ZGUgcHJvZmFuZSBhbmQgY3Vyc2Ugd29yZHMuCgpgYGB7cn0KIyBkYXRhIHByZXAKbnJjIDwtIGdldF9zZW50aW1lbnRzKCJucmMiKQp0d2VldHNfbnJjIDwtIGdlb2NvZGVkX3R3ZWV0cyAlPiUgaW5uZXJfam9pbihucmMpCgp0d2VldHNfbnJjICU+JSBmaWx0ZXIoc2VudGltZW50ID09ICJzYWRuZXNzIikgJT4lIAogIGdyb3VwX2J5KHdvcmQpICU+JSAKICBzdW1tYXJpc2UoZnJlcSA9IG1lYW4oZnJlcSkpICU+JSAKICBhcnJhbmdlKGRlc2MoZnJlcSkpCmBgYAoKIyMgV2hhdCBhcmUgdGhlIG1vc3QgY29tbW9uIGpveSB3b3Jkcz8KCllvdSBjYW4gdXNlIHRoZSBzYW1lIGFwcHJvYWNoIGZyb20gdGhlIGxhc3QgZXhlcmNpc2UgdG8gZmluZCB0aGUgbW9zdCBjb21tb24gd29yZHMgYXNzb2NpYXRlZCB3aXRoIGpveSBpbiB0aGVzZSB0d2VldHMuIFVzZSB0aGUgc2FtZSBwYXR0ZXJuIG9mIGBkcGx5cmAgdmVyYnMgdG8gZmluZCBhIG5ldyByZXN1bHQuCgojIyMjIEluc3RydWN0aW9ucwoqIEZpcnN0LCBmaWx0ZXIgdG8gZmluZCBvbmx5IHdvcmRzIGFzc29jaWF0ZWQgd2l0aCAiam95Ii4KKiBOZXh0LCBncm91cCBieSB3b3JkLgoqIFN1bW1hcml6ZSBmb3IgZWFjaCB3b3JkIHRvIGZpbmQgdGhlIGF2ZXJhZ2UgZnJlcXVlbmN5IGZyZXEgYWNyb3NzIHRoZSB3aG9sZSBVbml0ZWQgU3RhdGVzLgoqIEFycmFuZ2UgaW4gZGVzY2VuZGluZyBvcmRlciBvZiBmcmVxdWVuY3kuCgpOb3cgeW91IGNhbiBtYWtlIGEgdmlzdWFsaXphdGlvbiB1c2luZyBnZ3Bsb3QyIHRvIHNlZSB0aGVzZSByZXN1bHRzLgoqIExvYWQgdGhlIGBnZ3Bsb3QyYCBwYWNrYWdlLgoqIFB1dCB3b3JkcyBvbiB0aGUgeC1heGlzIGFuZCBmcmVxdWVuY3kgb24gdGhlIHktYXhpcy4KKiBVc2UgYGdlb21fY29sKClgIHRvIG1ha2UgYSBiYXIgY2hhcnQuIChJZiB5b3UgYXJlIGZhbWlsaWFyIHdpdGggYGdlb21fYmFyKHN0YXQgPSAiaWRlbnRpdHkiKWAsIGBnZW9tX2NvbCgpYCBkb2VzIHRoZSBzYW1lIHRoaW5nLikKCmBgYHtyfQpqb3lfd29yZHMgPC0gdHdlZXRzX25yYyAlPiUgCiAgZmlsdGVyKHNlbnRpbWVudCA9PSAiam95IikgJT4lIAogIGdyb3VwX2J5KHdvcmQpICU+JSAKICBzdW1tYXJpc2UoZnJlcSA9IG1lYW4oZnJlcSkpICU+JSAKICBhcnJhbmdlKGRlc2MoZnJlcSkpCgpsaWJyYXJ5KGdncGxvdDIpCgpqb3lfd29yZHMgJT4lCiAgdG9wX24oMjApICU+JSAKICBtdXRhdGUod29yZCA9IHJlb3JkZXIod29yZCwgZnJlcSkpICU+JSAjb3RoZXJ3aXNlIGNvbHVtbnMgYXJlIG5vdCByZW9yZGVyZWQgaW4gc3BpdGUgb2YgdGhlIGFycmFuZ2UoKSBmdW5jdGlvbgogIGdncGxvdChhZXMoeCA9IHdvcmQsIHkgPSBmcmVxKSkgKwogIGdlb21fY29sKCkgKwogIGNvb3JkX2ZsaXAoKQpgYGAKCiMjIERvIHBlb3BsZSBpbiBkaWZmZXJlbnQgc3RhdGVzIHVzZSBkaWZmZXJlbnQgd29yZHM/CgpTbyBmYXIgeW91IGhhdmUgbG9va2VkIGF0IHRoZSBVbml0ZWQgU3RhdGVzIGFzIGEgd2hvbGUsIGJ1dCB5b3UgY2FuIHVzZSB0aGlzIGRhdGFzZXQgdG8gZXhhbWluZSBkaWZmZXJlbmNlcyBpbiB3b3JkIHVzZSBieSBzdGF0ZS4gSW4gdGhpcyBleGVyY2lzZSwgeW91IHdpbGwgZXhhbWluZSB0d28gc3RhdGVzIGFuZCBjb21wYXJlIHRoZWlyIHVzZSBvZiBqb3kgd29yZHMuIERvIHRoZXkgdXNlIHRoZSBzYW1lIHdvcmRzIGFzc29jaWF0ZWQgd2l0aCBqb3k/IERvIHRoZXkgdXNlIHRoZXNlIHdvcmRzIGF0IHRoZSBzYW1lIHJhdGU/CgojIyMjIEluc3RydWN0aW9ucwoqIFVzZSB0aGUgY29ycmVjdCBgZHBseXJgIHZlcmIgdG8gZmluZCBvbmx5IHRoZSByb3dzIGZvciB0aGUgc3RhdGUgb2YgVXRhaC4KKiBBZGQgYW5vdGhlciBjb25kaXRpb24gaW5zaWRlIHRoZSBwYXJlbnRoZXNlcyB0byBmaW5kIG9ubHkgdGhlIHJvd3MgZm9yIHRoZSB3b3JkcyBhc3NvY2lhdGVkIHdpdGggam95LgoqIFVzZSB0aGUgYGRwbHlyYCB2ZXJiIHRoYXQgYXJyYW5nZXMgYSBkYXRhIGZyYW1lIHRvIHNvcnQgaW4gb3JkZXIgb2YgZGVzY2VuZGluZyBmcmVxdWVuY3kuCiogUmVwZWF0IHRoZXNlIHN0ZXBzIGZvciB0aGUgc3RhdGUgb2YgTG91aXNpYW5hLgoKYGBge3J9CnR3ZWV0c19ucmMgJT4lIAogIGZpbHRlcihzdGF0ZSA9PSAidXRhaCIgJiBzZW50aW1lbnQgPT0gImpveSIpICU+JQogIGFycmFuZ2UoZGVzYyhmcmVxKSkKIAp0d2VldHNfbnJjICU+JSAKICBmaWx0ZXIoc3RhdGUgPT0gImxvdWlzaWFuYSIgJiBzZW50aW1lbnQgPT0gImpveSIpICU+JQogIGFycmFuZ2UoZGVzYyhmcmVxKSkgCmBgYAoKIyMgV2hpY2ggc3RhdGVzIGhhdmUgdGhlIG1vc3QgcG9zaXRpdmUgVHdpdHRlciB1c2Vycz8KCkZvciB0aGUgbGFzdCBleGVyY2lzZSBpbiB0aGlzIGNoYXB0ZXIsIHlvdSB3aWxsIGRldGVybWluZSBob3cgdGhlIG92ZXJhbGwgc2VudGltZW50IG9mIFR3aXR0ZXIgc2VudGltZW50IHZhcmllcyBmcm9tIHN0YXRlIHRvIHN0YXRlLiBZb3Ugd2lsbCB1c2UgYSBkYXRhc2V0IGNhbGxlZCBgdHdlZXRzX2JpbmdgLCB3aGljaCBpcyB0aGUgb3V0cHV0IG9mIGFuIGlubmVyIGpvaW4gY3JlYXRlZCBqdXN0IHRoZSBzYW1lIHdheSB0aGF0IHlvdSBkaWQgZWFybGllci4gQ2hlY2sgb3V0IHdoYXQgYHR3ZWV0c19iaW5nYCBsb29rcyBsaWtlIGluIHRoZSBjb25zb2xlLgoKWW91IGNhbiB1c2UgYGdyb3VwX2J5KClgIGFuZCBgc3VtbWFyaXplKClgIHRvIGZpbmQgd2hpY2ggc3RhdGVzIGhhZCB0aGUgaGlnaGVzdCBmcmVxdWVuY3kgb2YgcG9zaXRpdmUgYW5kIG5lZ2F0aXZlIHdvcmRzLCB0aGVuIHBpcGUgdG8gYGdncGxvdDJgIChhZnRlciBzb21lIGB0aWR5cmAgbWFuaXB1bGF0aW9uKSB0byBtYWtlIGEgY2xlYXIsIGludGVyZXN0aW5nIHZpc3VhbGl6YXRpb24uCgojIyMjIEluc3RydWN0aW9ucwoqIENob29zZSB2YXJpYWJsZXMgaW4gdGhlIGNhbGwgdG8gYGdyb3VwX2J5KClgIHNvIHRoYXQgeW91IGNhbiBgc3VtbWFyaXplKClgIGJ5IGZpcnN0IHN0YXRlIGFuZCB0aGUgc2VudGltZW50LgoqIEFmdGVyIHVzaW5nIGBzcHJlYWQoKWAgZnJvbSBgdGlkeXJgIGFuZCB1bmdyb3VwaW5nLCBjYWxjdWxhdGUgdGhlIHJhdGlvIG9mIHBvc2l0aXZlIHRvIG5lZ2F0aXZlIHdvcmRzIGZvciBlYWNoIHN0YXRlLgoqIFRvIG1ha2UgYSBwbG90LCBzZXQgdXAgYGFlcygpYCBzbyB0aGF0IHN0YXRlcyB3aWxsIGdvIG9uIHRoZSBgeC1heGlzYCBhbmQgdGhlIHJhdGlvIHdpbGwgZ28gb24gdGhlIGB5LWF4aXNgLgoqIEFkZCB0aGUgY29ycmVjdCBgZ2VvbV8qYCBsYXllciB0byBtYWtlIHBvaW50cyBvbiB0aGUgcGxvdC4KVGhlIGNhbGwgdG8gYGNvb3JkX2ZsaXAoKWAgZmxpcHMgdGhlIGF4ZXMgc28geW91IGNhbiByZWFkIHRoZSBuYW1lcyBvZiB0aGUgc3RhdGVzIG1vcmUgZWFzaWx5LgoKYGBge3J9CmxpYnJhcnkodGlkeXIpCgp0d2VldHNfYmluZyAlPiUgCiAgZ3JvdXBfYnkoc3RhdGUsIHNlbnRpbWVudCkgJT4lIAogIHN1bW1hcmlzZShmcmVxID0gbWVhbihmcmVxKSkgJT4lIAogIHNwcmVhZChzZW50aW1lbnQsIGZyZXEpICU+JSAKICB1bmdyb3VwKCkgJT4lIAogIG11dGF0ZShyYXRpbyA9IHBvc2l0aXZlIC8gbmVnYXRpdmUsIHN0YXRlID0gcmVvcmRlcihzdGF0ZSwgcmF0aW8pKSAlPiUgCiAgZ2dwbG90KGFlcyh4ID0gc3RhdGUsIHkgPSByYXRpbykpICsKICBnZW9tX3BvaW50KCkgKwogIGNvb3JkX2ZsaXAoKQpgYGAKCg==</div>
+<div id="rmd-source-code">LS0tCnRpdGxlOiAiU2VudGltZW50IEFuYWx5c2lzIGluIFI6IFRoZSBUaWR5IFdheSIKc3VidGl0bGU6ICJEYXRhQ2FtcCBjb3Vyc2UgYnkgSnVsaWEgU2lsZ2UiCmF1dGhvcjogIkxhdXJlbnQgQmFyY2VsbyIKZGF0ZTogIlNlcHRlbWJlciwgMjIsIDIwMTgiCm91dHB1dDogCiAgaHRtbF9ub3RlYm9vazoKICAgIHRvYzogVFJVRQogICAgdG9jX2RlcHRoOiAyCi0tLQoKYGBge3Igc2V0dXAsIGluY2x1ZGU9RkFMU0V9CmtuaXRyOjpvcHRzX2NodW5rJHNldChldmFsID0gRikKYGBgCgojIDFzdCBTZWdtZW50IC0gVHdlZXRzIGFjcm9zcyB0aGUgVW5pdGVkIFN0YXRlcwoKIyMgU2VudGltZW50IGxleGljb25zCgpUaGVyZSBhcmUgc2V2ZXJhbCBkaWZmZXJlbnQgKipzZW50aW1lbnQgbGV4aWNvbnMqKiBhdmFpbGFibGUgZm9yIHNlbnRpbWVudCBhbmFseXNpcy4gWW91IHdpbGwgZXhwbG9yZSB0aHJlZSBpbiB0aGlzIGNvdXJzZSB0aGF0IGFyZSBhdmFpbGFibGUgaW4gdGhlIGB0aWR5dGV4dGAgcGFja2FnZToKCiogYGFmaW5uYCBmcm9tIEZpbm4gw4VydXAgTmllbHNlbiwKKiBgYmluZ2AgZnJvbSBCaW5nIExpdSBhbmQgY29sbGFib3JhdG9ycywgYW5kCiogYG5yY2AgZnJvbSBTYWlmIE1vaGFtbWFkIGFuZCBQZXRlciBUdXJuZXkuCgpZb3Ugd2lsbCBzZWUgaG93IHRoZXNlIGxleGljb25zIGNhbiBiZSB1c2VkIGFzIHlvdSB3b3JrIHRocm91Z2ggdGhpcyBjb3Vyc2UuIFRoZSBkZWNpc2lvbiBhYm91dCB3aGljaCBsZXhpY29uIHRvIHVzZSBvZnRlbiBkZXBlbmRzIG9uIHdoYXQgcXVlc3Rpb24geW91IGFyZSB0cnlpbmcgdG8gYW5zd2VyLgpJbiB0aGlzIGV4ZXJjaXNlLCB5b3Ugd2lsbCB1c2UgYGRwbHlyYCdzIGBjb3VudCgpYCBmdW5jdGlvbi4gSWYgeW91IHBhc3MgYGNvdW50KClgIGEgdmFyaWFibGUsIGl0IHdpbGwgY291bnQgdGhlIG51bWJlciBvZiByb3dzIHRoYXQgc2hhcmUgZWFjaCBkaXN0aW5jdCB2YWx1ZSBvZiB0aGF0IHZhcmlhYmxlLgoKIyMjIyBJbnN0cnVjdGlvbnMKKiBMb2FkIHRoZSBgZHBseXJgIGFuZCBgdGlkeXRleHRgIHBhY2thZ2VzLgoqIEFkZCBhbiBhcmd1bWVudCB0byBgZ2V0X3NlbnRpbWVudHMoKWAgdG8gc2VlIHdoYXQgdGhlIGAiYmluZyJgIGxleGljb24gbG9va3MgbGlrZS4KKiBUaGVuIGNhbGwgYGdldF9zZW50aW1lbnRzKClgIGZvciB0aGUgYCJucmMiYCBsZXhpY29uLgoqIEFkZCBhbiBhcmd1bWVudCB0byBgY291bnQoKWAgc28geW91IGNhbiBzZWUgaG93IG1hbnkgd29yZHMgdGhlIGBucmNgIGxleGljb24gaGFzIGZvciBlYWNoIHNlbnRpbWVudCBjYXRlZ29yeS4KCmBgYHtyfQpsaWJyYXJ5KGRwbHlyKQpsaWJyYXJ5KHRpZHl0ZXh0KQoKZ2V0X3NlbnRpbWVudHMoImJpbmciKQpnZXRfc2VudGltZW50cygibnJjIikKCmdldF9zZW50aW1lbnRzKCJucmMiKSAlPiUgCiAgZ3JvdXBfYnkoc2VudGltZW50KSAlPiUgCiAgY291bnQoKQoKZ2V0X3NlbnRpbWVudHMoIm5yYyIpICU+JSBjb3VudChzZW50aW1lbnQpCgpgYGAKCiMjIEltcGxlbWVudCBhbiBpbm5lciBqb2luCgpJbiB0aGlzIGV4ZXJjaXNlIHlvdSB3aWxsIGltcGxlbWVudCBzZW50aW1lbnQgYW5hbHlzaXMgdXNpbmcgYW4gaW5uZXIgam9pbi4gVGhlIGBpbm5lcl9qb2luKClgIGZ1bmN0aW9uIGZyb20gZHBseXIgd2lsbCBpZGVudGlmeSB3aGljaCB3b3JkcyBhcmUgaW4gYm90aCB0aGUgc2VudGltZW50IGxleGljb24gYW5kIHRoZSB0ZXh0IGRhdGFzZXQgeW91IGFyZSBleGFtaW5pbmcuIFRvIGxlYXJuIG1vcmUgYWJvdXQgam9pbmluZyBkYXRhIGZyYW1lcyB1c2luZyBkcGx5ciwgY2hlY2sgb3V0IEpvaW5pbmcgRGF0YSBpbiBSIHdpdGggYGRwbHlyYC4KClRoZSBgZ2VvY29kZWRfdHdlZXRzYCBkYXRhc2V0IGlzIHRha2VuIGZyb20gUXVhcnR6IGFuZCBjb250YWlucyB0aHJlZSBjb2x1bW5zOgoKKiBgc3RhdGVgLCBhIHN0YXRlIGluIHRoZSBVbml0ZWQgU3RhdGVzCiogYHdvcmRgLCBhIHdvcmQgdXNlZCBpbiB0d2VldHMgcG9zdGVkIG9uIFR3aXR0ZXIKKiBgZnJlcWAsIHRoZSBhdmVyYWdlIGZyZXF1ZW5jeSBvZiB0aGF0IHdvcmQgaW4gdGhhdCBzdGF0ZSAocGVyIGJpbGxpb24gd29yZHMpCgpJZiB5b3UgbG9vayBhdCB0aGlzIGRhdGFzZXQgaW4gdGhlIGNvbnNvbGUsIHlvdSB3aWxsIG5vdGljZSB0aGF0IHRoZSB3b3JkICJhIiBoYXMgYSBoaWdoIGZyZXF1ZW5jeSBjb21wYXJlZCB0byB0aGUgb3RoZXIgd29yZHMgbmVhciB0aGUgdG9wIG9mIHRoZSBzb3J0ZWQgZGF0YSBmcmFtZTsgdGhpcyBtYWtlcyBzZW5zZSEgWW91IGNhbiB1c2UgYGlubmVyX2pvaW4oKWAgdG8gaW1wbGVtZW50IGEgc2VudGltZW50IGFuYWx5c2lzIG9uIHRoaXMgZGF0YXNldCBiZWNhdXNlIGl0IGlzIGluIGEgdGlkeSBmb3JtYXQuCgojIyMjIEluc3RydWN0aW9ucwoqIEluIHRoZSBjb25zb2xlLCB0YWtlIGEgbG9vayBhdCB0aGUgYGdlb2NvZGVkX3R3ZWV0c2Agb2JqZWN0LgoqIFVzZSBgZ2V0X3NlbnRpbWVudHMoKWAgdG8gYWNjZXNzIHRoZSBgImJpbmciYCBsZXhpY29uIGFuZCBhc3NpZ24gaXQgdG8gYmluZy4KKiBVc2UgYW4gYGlubmVyX2pvaW4oKWAgdG8gaW1wbGVtZW50IHNlbnRpbWVudCBhbmFseXNpcyBvbiB0aGUgZ2VvY29kZWQgdHdlZXQgZGF0YSB1c2luZyB0aGUgYGJpbmdgIGxleGljb24uCgpgYGB7ciBldmFsID0gRn0KbG9hZCgiL1VzZXJzL2xiYXJjZWxvL1JfUmVwby9EYXRhQ2FtcC9TZW50aW1lbnQgQW5hbHlzaXMgaW4gUjogVGhlIFRpZHkgV2F5L0RhdGEvZ2VvY29kZWRfdHdlZXRzLnJkYSIpCgpoZWFkKGdlb2NvZGVkX3R3ZWV0cykKYmluZyA8LSBnZXRfc2VudGltZW50cyhsZXhpY29uID0gImJpbmciKQp0d2VldHNfYmluZyA8LSBnZW9jb2RlZF90d2VldHMgJT4lIGlubmVyX2pvaW4oYmluZykKYGBgCgojIyBXaGF0IGFyZSB0aGUgbW9zdCBjb21tb24gc2FkbmVzcyB3b3Jkcz8KCkFmdGVyIHlvdSBoYXZlIGltcGxlbWVudGVkIHNlbnRpbWVudCBhbmFseXNpcyB1c2luZyBgaW5uZXJfam9pbigpYCwgeW91IGNhbiB1c2UgYGRwbHlyYCBmdW5jdGlvbnMgc3VjaCBhcyBgZ3JvdXBfYnkoKWAgYW5kIGBzdW1tYXJpemUoKWAgdG8gdW5kZXJzdGFuZCB5b3VyIHJlc3VsdHMuIEZvciBleGFtcGxlLCB3aGF0IGFyZSB0aGUgbW9zdCBjb21tb24gd29yZHMgcmVsYXRlZCB0byBzYWRuZXNzIGluIHRoaXMgVHdpdHRlciBkYXRhc2V0PwoKIyMjIyBJbnN0cnVjdGlvbnMKVGFrZSBhIGxvb2sgYXQgdGhlIGB0d2VldHNfbnJjYCBvYmplY3QsIHRoZSBvdXRwdXQgb2YgYW4gYGlubmVyIGpvaW5gIGp1c3QgbGlrZSB0aGUgb25lIHlvdSBkaWQgaW4gdGhlIGxhc3QgZXhlcmNpc2UuIFRoZW4gbWFuaXB1bGF0ZSBpdCB0byBmaW5kIHRoZSBtb3N0IGNvbW1vbiB3b3JkcyB0aGF0IGFyZSByZWxhdGVkIHRvIHNhZG5lc3MuCgoqIEZpbHRlciBvbmx5IHRoZSByb3dzIHRoYXQgaGF2ZSB3b3JkcyBhc3NvY2lhdGVkIHdpdGggc2FkbmVzcy4KKiBHcm91cCBieSB3b3JkIHRvIGZpbmQgdGhlIGF2ZXJhZ2UgYWNyb3NzIHRoZSBVbml0ZWQgU3RhdGVzLgoqIFVzZSB0aGUgYHN1bW1hcml6ZSgpYCBhbmQgYGFycmFuZ2UoKWAgdmVyYnMgZmluZCB0aGUgYXZlcmFnZSBmcmVxdWVuY3kgZm9yIGVhY2ggd29yZCwgYW5kIHRoZW4gc29ydC4KKiBCZSBhd2FyZSB0aGF0IHRoaXMgaXMgcmVhbCBkYXRhIGZyb20gVHdpdHRlciBhbmQgdGhlcmUgaXMgc29tZSB1c2Ugb2YgcHJvZmFuaXR5OyB0aGUgc2VudGltZW50IGxleGljb25zIGluY2x1ZGUgcHJvZmFuZSBhbmQgY3Vyc2Ugd29yZHMuCgpgYGB7cn0KIyBkYXRhIHByZXAKbnJjIDwtIGdldF9zZW50aW1lbnRzKCJucmMiKQp0d2VldHNfbnJjIDwtIGdlb2NvZGVkX3R3ZWV0cyAlPiUgaW5uZXJfam9pbihucmMpCgp0d2VldHNfbnJjICU+JSBmaWx0ZXIoc2VudGltZW50ID09ICJzYWRuZXNzIikgJT4lIAogIGdyb3VwX2J5KHdvcmQpICU+JSAKICBzdW1tYXJpc2UoZnJlcSA9IG1lYW4oZnJlcSkpICU+JSAKICBhcnJhbmdlKGRlc2MoZnJlcSkpCmBgYAoKIyMgV2hhdCBhcmUgdGhlIG1vc3QgY29tbW9uIGpveSB3b3Jkcz8KCllvdSBjYW4gdXNlIHRoZSBzYW1lIGFwcHJvYWNoIGZyb20gdGhlIGxhc3QgZXhlcmNpc2UgdG8gZmluZCB0aGUgbW9zdCBjb21tb24gd29yZHMgYXNzb2NpYXRlZCB3aXRoIGpveSBpbiB0aGVzZSB0d2VldHMuIFVzZSB0aGUgc2FtZSBwYXR0ZXJuIG9mIGBkcGx5cmAgdmVyYnMgdG8gZmluZCBhIG5ldyByZXN1bHQuCgojIyMjIEluc3RydWN0aW9ucwoqIEZpcnN0LCBmaWx0ZXIgdG8gZmluZCBvbmx5IHdvcmRzIGFzc29jaWF0ZWQgd2l0aCAiam95Ii4KKiBOZXh0LCBncm91cCBieSB3b3JkLgoqIFN1bW1hcml6ZSBmb3IgZWFjaCB3b3JkIHRvIGZpbmQgdGhlIGF2ZXJhZ2UgZnJlcXVlbmN5IGZyZXEgYWNyb3NzIHRoZSB3aG9sZSBVbml0ZWQgU3RhdGVzLgoqIEFycmFuZ2UgaW4gZGVzY2VuZGluZyBvcmRlciBvZiBmcmVxdWVuY3kuCgpOb3cgeW91IGNhbiBtYWtlIGEgdmlzdWFsaXphdGlvbiB1c2luZyBnZ3Bsb3QyIHRvIHNlZSB0aGVzZSByZXN1bHRzLgoqIExvYWQgdGhlIGBnZ3Bsb3QyYCBwYWNrYWdlLgoqIFB1dCB3b3JkcyBvbiB0aGUgeC1heGlzIGFuZCBmcmVxdWVuY3kgb24gdGhlIHktYXhpcy4KKiBVc2UgYGdlb21fY29sKClgIHRvIG1ha2UgYSBiYXIgY2hhcnQuIChJZiB5b3UgYXJlIGZhbWlsaWFyIHdpdGggYGdlb21fYmFyKHN0YXQgPSAiaWRlbnRpdHkiKWAsIGBnZW9tX2NvbCgpYCBkb2VzIHRoZSBzYW1lIHRoaW5nLikKCmBgYHtyfQpqb3lfd29yZHMgPC0gdHdlZXRzX25yYyAlPiUgCiAgZmlsdGVyKHNlbnRpbWVudCA9PSAiam95IikgJT4lIAogIGdyb3VwX2J5KHdvcmQpICU+JSAKICBzdW1tYXJpc2UoZnJlcSA9IG1lYW4oZnJlcSkpICU+JSAKICBhcnJhbmdlKGRlc2MoZnJlcSkpCgpsaWJyYXJ5KGdncGxvdDIpCgpqb3lfd29yZHMgJT4lCiAgdG9wX24oMjApICU+JSAKICBtdXRhdGUod29yZCA9IHJlb3JkZXIod29yZCwgZnJlcSkpICU+JSAjb3RoZXJ3aXNlIGNvbHVtbnMgYXJlIG5vdCByZW9yZGVyZWQgaW4gc3BpdGUgb2YgdGhlIGFycmFuZ2UoKSBmdW5jdGlvbgogIGdncGxvdChhZXMoeCA9IHdvcmQsIHkgPSBmcmVxKSkgKwogIGdlb21fY29sKCkgKwogIGNvb3JkX2ZsaXAoKQpgYGAKCiMjIERvIHBlb3BsZSBpbiBkaWZmZXJlbnQgc3RhdGVzIHVzZSBkaWZmZXJlbnQgd29yZHM/CgpTbyBmYXIgeW91IGhhdmUgbG9va2VkIGF0IHRoZSBVbml0ZWQgU3RhdGVzIGFzIGEgd2hvbGUsIGJ1dCB5b3UgY2FuIHVzZSB0aGlzIGRhdGFzZXQgdG8gZXhhbWluZSBkaWZmZXJlbmNlcyBpbiB3b3JkIHVzZSBieSBzdGF0ZS4gSW4gdGhpcyBleGVyY2lzZSwgeW91IHdpbGwgZXhhbWluZSB0d28gc3RhdGVzIGFuZCBjb21wYXJlIHRoZWlyIHVzZSBvZiBqb3kgd29yZHMuIERvIHRoZXkgdXNlIHRoZSBzYW1lIHdvcmRzIGFzc29jaWF0ZWQgd2l0aCBqb3k/IERvIHRoZXkgdXNlIHRoZXNlIHdvcmRzIGF0IHRoZSBzYW1lIHJhdGU/CgojIyMjIEluc3RydWN0aW9ucwoqIFVzZSB0aGUgY29ycmVjdCBgZHBseXJgIHZlcmIgdG8gZmluZCBvbmx5IHRoZSByb3dzIGZvciB0aGUgc3RhdGUgb2YgVXRhaC4KKiBBZGQgYW5vdGhlciBjb25kaXRpb24gaW5zaWRlIHRoZSBwYXJlbnRoZXNlcyB0byBmaW5kIG9ubHkgdGhlIHJvd3MgZm9yIHRoZSB3b3JkcyBhc3NvY2lhdGVkIHdpdGggam95LgoqIFVzZSB0aGUgYGRwbHlyYCB2ZXJiIHRoYXQgYXJyYW5nZXMgYSBkYXRhIGZyYW1lIHRvIHNvcnQgaW4gb3JkZXIgb2YgZGVzY2VuZGluZyBmcmVxdWVuY3kuCiogUmVwZWF0IHRoZXNlIHN0ZXBzIGZvciB0aGUgc3RhdGUgb2YgTG91aXNpYW5hLgoKYGBge3J9CnR3ZWV0c19ucmMgJT4lIAogIGZpbHRlcihzdGF0ZSA9PSAidXRhaCIgJiBzZW50aW1lbnQgPT0gImpveSIpICU+JQogIGFycmFuZ2UoZGVzYyhmcmVxKSkKIAp0d2VldHNfbnJjICU+JSAKICBmaWx0ZXIoc3RhdGUgPT0gImxvdWlzaWFuYSIgJiBzZW50aW1lbnQgPT0gImpveSIpICU+JQogIGFycmFuZ2UoZGVzYyhmcmVxKSkgCmBgYAoKIyMgV2hpY2ggc3RhdGVzIGhhdmUgdGhlIG1vc3QgcG9zaXRpdmUgVHdpdHRlciB1c2Vycz8KCkZvciB0aGUgbGFzdCBleGVyY2lzZSBpbiB0aGlzIGNoYXB0ZXIsIHlvdSB3aWxsIGRldGVybWluZSBob3cgdGhlIG92ZXJhbGwgc2VudGltZW50IG9mIFR3aXR0ZXIgc2VudGltZW50IHZhcmllcyBmcm9tIHN0YXRlIHRvIHN0YXRlLiBZb3Ugd2lsbCB1c2UgYSBkYXRhc2V0IGNhbGxlZCBgdHdlZXRzX2JpbmdgLCB3aGljaCBpcyB0aGUgb3V0cHV0IG9mIGFuIGlubmVyIGpvaW4gY3JlYXRlZCBqdXN0IHRoZSBzYW1lIHdheSB0aGF0IHlvdSBkaWQgZWFybGllci4gQ2hlY2sgb3V0IHdoYXQgYHR3ZWV0c19iaW5nYCBsb29rcyBsaWtlIGluIHRoZSBjb25zb2xlLgoKWW91IGNhbiB1c2UgYGdyb3VwX2J5KClgIGFuZCBgc3VtbWFyaXplKClgIHRvIGZpbmQgd2hpY2ggc3RhdGVzIGhhZCB0aGUgaGlnaGVzdCBmcmVxdWVuY3kgb2YgcG9zaXRpdmUgYW5kIG5lZ2F0aXZlIHdvcmRzLCB0aGVuIHBpcGUgdG8gYGdncGxvdDJgIChhZnRlciBzb21lIGB0aWR5cmAgbWFuaXB1bGF0aW9uKSB0byBtYWtlIGEgY2xlYXIsIGludGVyZXN0aW5nIHZpc3VhbGl6YXRpb24uCgojIyMjIEluc3RydWN0aW9ucwoqIENob29zZSB2YXJpYWJsZXMgaW4gdGhlIGNhbGwgdG8gYGdyb3VwX2J5KClgIHNvIHRoYXQgeW91IGNhbiBgc3VtbWFyaXplKClgIGJ5IGZpcnN0IHN0YXRlIGFuZCB0aGUgc2VudGltZW50LgoqIEFmdGVyIHVzaW5nIGBzcHJlYWQoKWAgZnJvbSBgdGlkeXJgIGFuZCB1bmdyb3VwaW5nLCBjYWxjdWxhdGUgdGhlIHJhdGlvIG9mIHBvc2l0aXZlIHRvIG5lZ2F0aXZlIHdvcmRzIGZvciBlYWNoIHN0YXRlLgoqIFRvIG1ha2UgYSBwbG90LCBzZXQgdXAgYGFlcygpYCBzbyB0aGF0IHN0YXRlcyB3aWxsIGdvIG9uIHRoZSBgeC1heGlzYCBhbmQgdGhlIHJhdGlvIHdpbGwgZ28gb24gdGhlIGB5LWF4aXNgLgoqIEFkZCB0aGUgY29ycmVjdCBgZ2VvbV8qYCBsYXllciB0byBtYWtlIHBvaW50cyBvbiB0aGUgcGxvdC4KVGhlIGNhbGwgdG8gYGNvb3JkX2ZsaXAoKWAgZmxpcHMgdGhlIGF4ZXMgc28geW91IGNhbiByZWFkIHRoZSBuYW1lcyBvZiB0aGUgc3RhdGVzIG1vcmUgZWFzaWx5LgoKYGBge3J9CmxpYnJhcnkodGlkeXIpCgp0d2VldHNfYmluZyAlPiUgCiAgZ3JvdXBfYnkoc3RhdGUsIHNlbnRpbWVudCkgJT4lIAogIHN1bW1hcmlzZShmcmVxID0gbWVhbihmcmVxKSkgJT4lIAogIHNwcmVhZChzZW50aW1lbnQsIGZyZXEpICU+JSAKICB1bmdyb3VwKCkgJT4lIAogIG11dGF0ZShyYXRpbyA9IHBvc2l0aXZlIC8gbmVnYXRpdmUsIHN0YXRlID0gcmVvcmRlcihzdGF0ZSwgcmF0aW8pKSAlPiUgCiAgZ2dwbG90KGFlcyh4ID0gc3RhdGUsIHkgPSByYXRpbykpICsKICBnZW9tX3BvaW50KCkgKwogIGNvb3JkX2ZsaXAoKQpgYGAKCgojIDJuZCBTZWdtZW50IC0gU2hha2VzcGVhcmUgZ2V0cyBTZW50aW1lbnRhbAoKIyMgVG8gYmUsIG9yIG5vdCB0byBiZQoKTGV0J3MgdGFrZSBhIGxvb2sgYXQgdGhlIGRhdGFzZXQgeW91IHdpbGwgdXNlIGluIHRoaXMgY2hhcHRlciB0byBsZWFybiBtb3JlIGFib3V0IHRpZHlpbmcgdGV4dCBhbmQgc2VudGltZW50IGFuYWx5c2lzLiBUaGUgYHNoYWtlc3BlYXJlYCBkYXRhc2V0IGNvbnRhaW5zIHRocmVlIGNvbHVtbnM6CgoqIGB0aXRsZWAsIHRoZSB0aXRsZSBvZiBhIFNoYWtlc3BlYXJlYW4gcGxheSwKKiBgdHlwZWAsIHRoZSB0eXBlIG9mIHBsYXksIGVpdGhlciB0cmFnZWR5IG9yIGNvbWVkeSwgYW5kCiogYHRleHRgLCBhIGxpbmUgZnJvbSB0aGF0IHBsYXkuCgpUaGlzIGRhdGEgZnJhbWUgY29udGFpbnMgdGhlIGVudGlyZSB0ZXh0cyBvZiBzaXggcGxheXMuCgojIyMjIEluc3RydWN0aW9ucwoqIEluIHRoZSBjb25zb2xlLCB0YWtlIGEgbG9vayBhdCB0aGUgYHNoYWtlc3BlYXJlYCBvYmplY3QuCiogUGlwZSB0aGUgZGF0YSBmcmFtZSB3aXRoIHRoZSBTaGFrZXNwZWFyZSB0ZXh0cyB0byB0aGUgbmV4dCBsaW5lLgoqIFVzZSBgY291bnQoKWAgd2l0aCB0d28gYXJndW1lbnRzIHRvIGZpbmQgb3V0IHdoaWNoIHRpdGxlcyBhcmUgaW4gdGhpcyBkYXRhc2V0LCB3aGV0aGVyIHRoZXkgYXJlIHRyYWdlZGllcyBvciBjb21lZGllcywgYW5kIGhvdyBtYW55IGxpbmVzIHRoZXkgaGF2ZS4KCmBgYHtyfQojIGRhdGEgcHJlcApsb2FkKCIvVXNlcnMvbGJhcmNlbG8vUl9SZXBvL0RhdGFDYW1wL1NlbnRpbWVudCBBbmFseXNpcyBpbiBSOiBUaGUgVGlkeSBXYXkvRGF0YS9zaGFrZXNwZWFyZS5yZGEiKQpoZWFkKHNoYWtlc3BlYXJlKQpjbGFzcyhzaGFrZXNwZWFyZSkKCgpzaGFrZXNwZWFyZSAlPiUgY291bnQodGl0bGUsIHR5cGUpCgpgYGAKCiMjIFVubmVzdGluZyBmcm9tIHRleHQgdG8gd29yZAoKVGhlIHNoYWtlc3BlYXJlIGRhdGFzZXQgaXMgbm90IHlldCBjb21wYXRpYmxlIHdpdGggdGlkeSB0b29scy4gWW91IG5lZWQgdG8gZmlyc3QgYnJlYWsgdGhlIHRleHQgaW50byBpbmRpdmlkdWFsIHRva2VucyAodGhlIHByb2Nlc3Mgb2YgdG9rZW5pemF0aW9uKTsgYSB0b2tlbiBpcyBhIG1lYW5pbmdmdWwgdW5pdCBvZiB0ZXh0IGZvciBhbmFseXNpcywgaW4gbWFueSBjYXNlcywganVzdCBzeW5vbnltb3VzIHdpdGggYSBzaW5nbGUgd29yZC4gWW91IGFsc28gbmVlZCB0byB0cmFuc2Zvcm0gdGhlIHRleHQgdG8gYSB0aWR5IGRhdGEgc3RydWN0dXJlIHdpdGggb25lIHRva2VuIHBlciByb3cuIFlvdSBjYW4gdXNlIHRpZHl0ZXh04oCZcyBgdW5uZXN0X3Rva2VucygpYCBmdW5jdGlvbiB0byBhY2NvbXBsaXNoIGFsbCBvZiB0aGlzIGF0IG9uY2UuCgojIyMjIEluc3RydWN0aW9ucwoqIExvYWQgdGhlIGB0aWR5dGV4dGAgcGFja2FnZS4KKiBHcm91cCBieSB0aXRsZSB0byBhbm5vdGF0ZSB0aGUgZGF0YSBmcmFtZSBieSBsaW5lIG51bWJlci4KKiBEZWZpbmUgYSBuZXcgY29sdW1uIHVzaW5nIGBtdXRhdGUoKWAgY2FsbGVkIGxpbmVudW1iZXIgdGhhdCBrZWVwcyB0cmFjayBvZiB3aGljaCBsaW5lIG9mIHRoZSBwbGF5IHRleHQgaXMgZnJvbS4gKiAoQ2hlY2sgb3V0IGByb3dfbnVtYmVyKClgIHRvIGRvIHRoaXMhKQoqIFVzZSBgdW5uZXN0X3Rva2VucygpYCB0byB0cmFuc2Zvcm0gdGhlIG5vbi10aWR5IHRleHQgZGF0YSB0byBhIHRpZHkgdGV4dCBkYXRhc2V0LgoqIFBpcGUgdGhlIHRpZHkgU2hha2VzcGVhcmUgZGF0YSBmcmFtZSB0byB0aGUgbmV4dCBsaW5lLgoqIFVzZSBgY291bnQoKWAgdG8gZmluZCBvdXQgaG93IG1hbnkgdGltZXMgZWFjaCB3b3JkIGlzIHVzZWQgaW4gU2hha2VzcGVhcmUncyBwbGF5cy4KCmBgYHtyfQpsaWJyYXJ5KHRpZHl0ZXh0KQoKdGlkeV9zaGFrZXNwZWFyZSA8LSBzaGFrZXNwZWFyZSAlPiUgCiAgZ3JvdXBfYnkodGl0bGUpICU+JSAKICBtdXRhdGUobGluZW51bWJlciA9IHJvd19udW1iZXIoKSkgJT4lIAogIHVubmVzdF90b2tlbnMod29yZCwgdGV4dCkgJT4lIAogIHVuZ3JvdXAoKQoKdGlkeV9zaGFrZXNwZWFyZSAlPiUgCiAgY291bnQod29yZCwgc29ydCA9IFQpCmBgYAoKIyMgU2VudGltZW50IGFuYWx5c2lzIG9mIFNoYWtlc3BlYXJlCgpZb3UgbGVhcm5lZCBob3cgdG8gaW1wbGVtZW50IHNlbnRpbWVudCBhbmFseXNpcyB3aXRoIGEgam9pbiBpbiB0aGUgZmlyc3QgY2hhcHRlciBvZiB0aGlzIGNvdXJzZS4gQWZ0ZXIgdHJhbnNmb3JtaW5nIHRoZSB0ZXh0IG9mIHRoZXNlIFNoYWtlc3BlYXJlYW4gcGxheXMgdG8gYSB0aWR5IHRleHQgZGF0YXNldCBpbiB0aGUgbGFzdCBleGVyY2lzZSwgdGhlIHJlc3VsdGluZyBkYXRhIGZyYW1lIHRpZHlfc2hha2VzcGVhcmUgaXMgcmVhZHkgZm9yIHNlbnRpbWVudCBhbmFseXNpcyB3aXRoIHN1Y2ggYW4gYXBwcm9hY2guIE9uY2UgeW91IGhhdmUgcGVyZm9ybWVkIHRoZSBzZW50aW1lbnQgYW5hbHlzaXMsIHlvdSBjYW4gZmluZCBvdXQgaG93IG1hbnkgbmVnYXRpdmUgYW5kIHBvc2l0aXZlIHdvcmRzIGVhY2ggcGxheSBoYXMgd2l0aCBqdXN0IG9uZSBsaW5lIG9mIGNvZGUuCgojIyMjIEluc3RydWN0aW9ucwoqIFVzZSB0aGUgY29ycmVjdCBraW5kIG9mIGpvaW4gdG8gaW1wbGVtZW50IHNlbnRpbWVudCBhbmFseXNpcy4KKiBBZGQgdGhlICJiaW5nIiBsZXhpY29uIGFzIHRoZSBhcmd1bWVudCB0byB0aGUgam9pbiBmdW5jdGlvbi4KKiBGaW5kIGhvdyBtYW55IHBvc2l0aXZlIGFuZCBuZWdhdGl2ZSB3b3JkcyBlYWNoIHBsYXkgaGFzIGJ5IHVzaW5nIHR3byBhcmd1bWVudHMgaW4gYGNvdW50KClgLgoKYGBge3J9CmJpbmcgPC0gZ2V0X3NlbnRpbWVudHMoImJpbmciKQoKc2hha2VzcGVhcmVfc2VudGltZW50IDwtIHRpZHlfc2hha2VzcGVhcmUgJT4lCiAgaW5uZXJfam9pbihiaW5nKQoKc2hha2VzcGVhcmVfc2VudGltZW50ICU+JSBjb3VudCh0aXRsZSwgc2VudGltZW50KQpgYGAKCiMjIFRyYWdlZHkgb3IgY29tZWR5PwoKVGhlIHRpZHkgZGF0YXNldCB5b3UgY3JlYXRlZCwgYHRpZHlfc2hha2VzcGVhcmVgLCBpcyBhZ2FpbiBhdmFpbGFibGUgaW4geW91ciBlbnZpcm9ubWVudC4gV2hpY2ggcGxheXMgaGF2ZSBhIGhpZ2hlciBwZXJjZW50YWdlIG9mIG5lZ2F0aXZlIHdvcmRzPyBEbyB0aGUgdHJhZ2VkaWVzIGhhdmUgbW9yZSBuZWdhdGl2ZSB3b3JkcyB0aGFuIHRoZSBjb21lZGllcz8KCiMjIyMgSW5zdHJ1Y3Rpb25zCkZpcnN0LCBjYWxjdWxhdGUgaG93IG1hbnkgbmVnYXRpdmUgYW5kIHBvc2l0aXZlIHdvcmRzIGVhY2ggcGxheSB1c2VkLgoKKiBJbXBsZW1lbnQgc2VudGltZW50IGFuYWx5c2lzIHVzaW5nIHRoZSBgImJpbmciYCBsZXhpY29uLgoqIFVzZSBgY291bnQoKWAgdG8gZmluZCB0aGUgbnVtYmVyIG9mIHdvcmRzIGZvciBlYWNoIGNvbWJpbmF0aW9uIG9mIHRpdGxlLCB0eXBlLCBhbmQgc2VudGltZW50LgoKTm93LCBmaW5kIHRoZSBwZXJjZW50YWdlIG9mIG5lZ2F0aXZlIHdvcmRzIGZvciBlYWNoIHBsYXkuCgoqIEdyb3VwIGJ5IHRoZSB0aXRsZXMgb2YgdGhlIHBsYXlzLgoqIEZpbmQgdGhlIHRvdGFsIG51bWJlciBvZiB3b3JkcyBpbiBlYWNoIHBsYXkgdXNpbmcgYHN1bSgpYC4KKiBDYWxjdWxhdGUgYSBwZXJjZW50IGZvciBlYWNoIHBsYXkgdGhhdCBpcyB0aGUgbnVtYmVyIG9mIHdvcmRzIG9mIGVhY2ggc2VudGltZW50IGRpdmlkZWQgYnkgdGhlIHRvdGFsIHdvcmRzIGluIHRoYXQgcGxheS4KKiBGaWx0ZXIgdGhlIHJlc3VsdHMgZm9yIG9ubHkgbmVnYXRpdmUgc2VudGltZW50LgoKYGBge3J9CnNlbnRpbWVudF9jb3VudHMgPC0gdGlkeV9zaGFrZXNwZWFyZSAlPiUgCiAgaW5uZXJfam9pbihiaW5nKSAlPiUgCiAgY291bnQodGl0bGUsIHR5cGUsIHNlbnRpbWVudCkKCnNlbnRpbWVudF9jb3VudHMgJT4lIAogIGdyb3VwX2J5KHRpdGxlKSAlPiUgCiAgbXV0YXRlKHRvdGFsID0gc3VtKG4pLCBwZXJjZW50ID0gbi90b3RhbCoxMDApICU+JSAKICBmaWx0ZXIoc2VudGltZW50ID09ICJuZWdhdGl2ZSIpICU+JSAKICBhcnJhbmdlKHBlcmNlbnQpCmBgYAoKIyMgTW9zdCBjb21tb24gcG9zaXRpdmUgYW5kIG5lZ2F0aXZlIHdvcmRzCgpZb3UgZm91bmQgaW4gdGhlIHByZXZpb3VzIGV4ZXJjaXNlIHRoYXQgU2hha2VzcGVhcmUncyB0cmFnZWRpZXMgdXNlIHByb3BvcnRpb25hbGx5IG1vcmUgbmVnYXRpdmUgd29yZHMgdGhhbiB0aGUgY29tZWRpZXMuIE5vdyB5b3UgY2FuIGV4cGxvcmUgd2hpY2ggc3BlY2lmaWMgd29yZHMgYXJlIGRyaXZpbmcgdGhlc2Ugc2VudGltZW50IHNjb3Jlcy4gV2hpY2ggYXJlIHRoZSBtb3N0IGNvbW1vbiBwb3NpdGl2ZSBhbmQgbmVnYXRpdmUgd29yZHMgaW4gdGhlc2UgcGxheXM/CgpUaGVyZSBhcmUgdGhyZWUgc3RlcHMgaW4gdGhlIGNvZGUgaW4gdGhpcyBleGVyY2lzZS4gVGhlIGZpcnN0IHN0ZXAgY291bnRzIGhvdyBtYW55IHRpbWVzIGVhY2ggd29yZCBpcyB1c2VkLCB0aGUgc2Vjb25kIHN0ZXAgdGFrZXMgdGhlIHRvcCAxMCBtb3N0LXVzZWQgcG9zaXRpdmUgYW5kIG5lZ2F0aXZlIHdvcmRzLCBhbmQgdGhlIGZpbmFsIHN0ZXAgbWFrZXMgYSBwbG90IHRvIHZpc3VhbGl6ZSB0aGlzIHJlc3VsdC4KCiMjIyMgSW5zdHJ1Y3Rpb25zCiogSW1wbGVtZW50IHNlbnRpbWVudCBhbmFseXNpcyB1c2luZyB0aGUgYCJiaW5nImAgbGV4aWNvbi4KKiBVc2UgYGNvdW50KClgIHRvIGZpbmQgd29yZCBjb3VudHMgYnkgc2VudGltZW50LgoqIEdyb3VwIGJ5IHNlbnRpbWVudCBzbyB5b3UgY2FuIHRha2UgdGhlIHRvcCAxMCB3b3JkcyBpbiBlYWNoIHNlbnRpbWVudC4KKiBOb3RpY2Ugd2hhdCB0aGUgbGluZSBgbXV0YXRlKHdvcmQgPSByZW9yZGVyKHdvcmQsIG4pKWAgZG9lczsgaXQgY29udmVydHMgd29yZCBmcm9tIGEgY2hhcmFjdGVyIHRoYXQgd291bGQgYmUgcGxvdHRlZCBpbiBhbHBoYWJldGljYWwgb3JkZXIgdG8gYSBmYWN0b3IgdGhhdCB3aWxsIGJlIHBsb3R0ZWQgaW4gb3JkZXIgb2Ygbi4KCk5vdyB5b3UgY2FuIG1ha2UgYSB2aXN1YWxpemF0aW9uIG9mIHRvcF93b3JkcyB1c2luZyBgZ2dwbG90MmAgdG8gc2VlIHRoZXNlIHJlc3VsdHMuCgoqIFB1dCB3b3JkIG9uIHRoZSB4LWF4aXMgYW5kIG4gb24gdGhlIHktYXhpcy4KKiBVc2UgYGdlb21fY29sKClgIHRvIG1ha2UgYSBiYXIgY2hhcnQuCgpgYGB7cn0Kd29yZF9jb3VudHMgPC0gdGlkeV9zaGFrZXNwZWFyZSAlPiUgCiAgaW5uZXJfam9pbihnZXRfc2VudGltZW50cygiYmluZyIpKSAlPiUgCiAgY291bnQoc2VudGltZW50LCB3b3JkKSAKCnRvcF93b3JkcyA8LSB3b3JkX2NvdW50cyAlPiUgCiAgZ3JvdXBfYnkoc2VudGltZW50KSAlPiUgCiAgdG9wX24oMTApICU+JSAKICB1bmdyb3VwKCkgJT4lICNpZiBub3QgdW5ncm91cGVkLCB0aGUgcmVvcmRlciB3b3VsZCBub3Qgd29yawogIG11dGF0ZSh3b3JkID0gcmVvcmRlcih3b3JkLCBuKSkKCmdncGxvdCh0b3Bfd29yZHMsIGFlcyh4ID0gd29yZCwgeSA9IG4sIGZpbGwgPSBzZW50aW1lbnQpKSArCiAgZ2VvbV9jb2woc2hvdy5sZWdlbmQgPSBGKSArCiAgZmFjZXRfd3JhcCh+IHNlbnRpbWVudCwgc2NhbGVzID0gImZyZWUiKSArCiAgY29vcmRfZmxpcCgpCmBgYAoKIyMgV29yZCBjb250cmlidXRpb25zIGJ5IHBsYXkKCllvdSBoYXZlIGFscmVhZHkgZXhwbG9yZWQgaG93IHdvcmRzIGNvbnRyaWJ1dGUgdG8gc2VudGltZW50IHNjb3JlcyBmb3IgU2hha2VzcGVhcmUncyBwbGF5cyBhcyBhIHdob2xlLiBJbiB0aGlzIGV4ZXJjaXNlLCB5b3Ugd2lsbCBsb29rIGF0IGRpZmZlcmVuY2VzIGJldHdlZW4gdGl0bGVzLiBZb3Ugd2lsbCBhbHNvIHByYWN0aWNlIHVzaW5nIGEgZGlmZmVyZW50IHNlbnRpbWVudCBsZXhpY29uLCB0aGUgYCJhZmlubiJgIGxleGljb24gaW4gd2hpY2ggd29yZHMgaGF2ZSBhIHNjb3JlIGZyb20gLTUgdG8gNS4gRGlmZmVyZW50IGxleGljb25zIHRha2UgZGlmZmVyZW50IGFwcHJvYWNoZXMgdG8gcXVhbnRpZnlpbmcgdGhlIGVtb3Rpb24vb3BpbmlvbiBjb250ZW50IG9mIHdvcmRzLgoKV2hpY2ggd29yZHMgY29udHJpYnV0ZSB0byB0aGUgb3ZlcmFsbCBzZW50aW1lbnQgaW4gd2hpY2ggcGxheXM/IEluIHRoaXMgZXhlcmNpc2UsIHlvdSB3aWxsIGxvb2sgc3BlY2lmaWNhbGx5IGF0IE1hY2JldGguCgojIyMjIEluc3RydWN0aW9ucwoqIFVzZSBgY291bnQoKWAgdG8gZmluZCBob3cgbWFueSB0aW1lcyBlYWNoIHdvcmQgaXMgdXNlZCBpbiBlYWNoIHBsYXkuCiogSW1wbGVtZW50IHNlbnRpbWVudCBhbmFseXNpcyB3aXRoIHRoZSBgImFmaW5uImAgbGV4aWNvbi4gKE5vdGljZSB0aGF0IGl0IGlzIHBvc3NpYmxlIHRvIHBlcmZvcm0gc2VudGltZW50IGFuYWx5c2lzIG9uIGNvdW50IGRhdGEsIG5vdCBvbmx5IHRoZSBvcmlnaW5hbCB0aWR5IGRhdGEgZnJhbWUuKQoqIEZpbHRlciB0byBvbmx5IGxvb2sgYXQgdGhlIHNlbnRpbWVudCBzY29yZXMgZm9yIE1hY2JldGg7IHRoZSB0aXRsZSBmb3IgTWFjYmV0aCBpcyAiVGhlIFRyYWdlZHkgb2YgTWFjYmV0aCIuCiogSW4gYSBzZWNvbmQgYXJndW1lbnQgdG8gYGZpbHRlcigpYCwgb25seSBleGFtaW5lIHdvcmRzIHdpdGggbmVnYXRpdmUgc2VudGltZW50LgoKYGBge3J9CnRpZHlfc2hha2VzcGVhcmUgJT4lIAogIGNvdW50KHRpdGxlLCB3b3JkLCBzb3J0ID0gVCkgJT4lIAogIGlubmVyX2pvaW4oZ2V0X3NlbnRpbWVudHMoImFmaW5uIikpICU+JSAKICBmaWx0ZXIodGl0bGUgPT0gIlRoZSBUcmFnZWR5IG9mIE1hY2JldGgiLCBzY29yZSA8IDAgKQpgYGAKCiMjIENhbGN1bGF0aW5nIGEgY29udHJpYnV0aW9uIHNjb3JlCgpJbiB0aGUgbGFzdCBleGVyY2lzZSwgeW91IHNhdyBob3cgd29yZHMgaW4gTWFjYmV0aCB3ZXJlIHVzZWQgZGlmZmVyZW50IG51bWJlciBvZiB0aW1lcyBhbmQgYWxzbyBoYWQgZGlmZmVyZW50IHNlbnRpbWVudCBzY29yZXMgaW4gdGhlICJhZmlubiIgbGV4aWNvbiwgZnJvbSAtNSB0byA1LiBTaW5jZSB0aGlzIGxleGljb24gcHJvdmlkZXMgdGhlc2Ugc2NvcmVzIGZvciBlYWNoIHdvcmQsIHlvdSBjYW4gY2FsY3VsYXRlIGEgcmVsYXRpdmUgY29udHJpYnV0aW9uIGZvciBlYWNoIHdvcmQgaW4gZWFjaCBwbGF5LiBUaGlzIGNvbnRyaWJ1dGlvbiBjYW4gYmUgZm91bmQgYnkgbXVsdGlwbHlpbmcgdGhlIHNjb3JlIGZvciBlYWNoIHdvcmQgYnkgdGhlIHRpbWVzIGl0IGlzIHVzZWQgaW4gZWFjaCBwbGF5IGFuZCBkaXZpZGVkIGJ5IHRoZSB0b3RhbCB3b3JkcyBpbiBlYWNoIHBsYXkuCgojIyMjIEluc3RydWN0aW9ucwoqIFVzZSBgY291bnQoKWAgdG8gZmluZCBob3cgbWFueSB0aW1lcyBlYWNoIHdvcmQgaXMgdXNlZCBpbiBlYWNoIHBsYXkuCiogSW1wbGVtZW50IHNlbnRpbWVudCBhbmFseXNpcyB3aXRoIHRoZSBgImFmaW5uImAgbGV4aWNvbi4KKiBHcm91cCBieSB0aGUgdGl0bGVzIG9mIHRoZSBwbGF5cyB0byBnZXQgcmVhZHkgdG8gY2FsY3VsYXRlIGEgdG90YWwgZm9yIGVhY2ggcGxheSBpbiB0aGUgbmV4dCBsaW5lLgoqIENhbGN1bGF0ZSBhIGNvbnRyaWJ1dGlvbiBmb3IgZWFjaCB3b3JkIGluIGVhY2ggcGxheTsgdGhlIGNvbnRyaWJ1dGlvbiBjYW4gYmUgZm91bmQgYnkgbXVsdGlwbHlpbmcgZWFjaCB3b3JkJ3Mgc2NvcmUgYnkgdGhlIHRpbWVzIGl0IGlzIHVzZWQgaW4gdGhlIHBsYXkgYW5kIGRpdmlkZWQgYnkgdGhlIHRvdGFsIHdvcmRzIGluIHRoZSBwbGF5LgoKYGBge3J9CnNlbnRpbWVudF9jb250cmlidXRpb25zIDwtIHRpZHlfc2hha2VzcGVhcmUgJT4lIAogIGNvdW50KHRpdGxlLCB3b3JkLCBzb3J0ID0gVCkgJT4lIAogIGlubmVyX2pvaW4oZ2V0X3NlbnRpbWVudHMoImFmaW5uIikpICU+JSAKICBncm91cF9ieSh0aXRsZSkgJT4lIAogIG11dGF0ZShjb250cmlidXRpb24gPSBzY29yZSAqIG4gLyBzdW0obikpICU+JSAKICB1bmdyb3VwKCkKCnNlbnRpbWVudF9jb250cmlidXRpb25zCmBgYAoKIyMgQWxhcywgcG9vciBZb3JpY2shCgpUaGUgYHNlbnRpbWVudF9jb250cmlidXRpb25zYCB0aGF0IHlvdSBjYWxjdWxhdGVkIGluIHRoZSBsYXN0IGV4ZXJjaXNlIGlzIGF2YWlsYWJsZSBpbiB5b3VyIGVudmlyb25tZW50LiBJdCdzIHRpbWUgdG8gZXhwbG9yZSBzb21lIG9mIHlvdXIgcmVzdWx0cyEgTG9vayBhdCBIYW1sZXQgYW5kIFRoZSBNZXJjaGFudCBvZiBWZW5pY2UgdG8gc2VlIHdoYXQgbmVnYXRpdmUgYW5kIHBvc2l0aXZlIHdvcmRzIGFyZSBpbXBvcnRhbnQgaW4gdGhlc2UgdHdvIHBsYXlzLgoKIyMjIyBJbnN0cnVjdGlvbnMKKiBMb29rIGF0IGBzZW50aW1lbnRfY29udHJpYnV0aW9uc2AgaW4gdGhlIGNvbnNvbGUgYW5kIHVzZSB3aGF0ZXZlciBzdHJhdGVneSB5b3UgbGlrZSB0byBmaW5kIHRoZSBleGFjdCB0aXRsZXMgZm9yIEhhbWxldCBhbmQgVGhlIE1lcmNoYW50IG9mIFZlbmljZS4gKFBlcmhhcHMgYGNvdW50KClgPykKKiBGaWx0ZXIgZm9yIEhhbWxldCBhbmQgYGFycmFuZ2UoKWAgaW4gYXNjZW5kaW5nIG9yZGVyICh0aGUgZGVmYXVsdCBvcmRlcikgb2YgY29udHJpYnV0aW9uIHRvIHNlZSB0aGUgd29yZHMgdGhhdCBjb250cmlidXRlZCBtb3N0IG5lZ2F0aXZlbHkuCiogRmlsdGVyIGZvciBUaGUgTWVyY2hhbnQgb2YgVmVuaWNlIGFuZCBgYXJyYW5nZSgpYCBpbiBkZXNjZW5kaW5nIG9yZGVyIG9mIGNvbnRyaWJ1dGlvbiB0byBzZWUgdGhlIHdvcmRzIHRoYXQgY29udHJpYnV0ZWQgbW9zdCBwb3NpdGl2ZWx5LgoKYGBge3J9CnNlbnRpbWVudF9jb250cmlidXRpb25zICU+JQogIGZpbHRlcih0aXRsZSA9PSAiSGFtbGV0LCBQcmluY2Ugb2YgRGVubWFyayIpICU+JSAKICBhcnJhbmdlKGNvbnRyaWJ1dGlvbikKCnNlbnRpbWVudF9jb250cmlidXRpb25zICU+JQogIGZpbHRlcih0aXRsZSA9PSAiVGhlIE1lcmNoYW50IG9mIFZlbmljZSIpICU+JSAKICBhcnJhbmdlKGRlc2MoY29udHJpYnV0aW9uKSkKYGBgCgojIyBTZW50aW1lbnQgY2hhbmdlcyB0aHJvdWdoIGEgcGxheQoKSW4gdGhlIGxhc3Qgc2V0IG9mIGV4ZXJjaXNlcyBpbiB0aGlzIGNoYXB0ZXIsIHlvdSB3aWxsIGV4YW1pbmUgaG93IHNlbnRpbWVudCBjaGFuZ2VzIHRocm91Z2ggdGhlIG5hcnJhdGl2ZSBhcmNzIG9mIHRoZXNlIFNoYWtlc3BlYXJlYW4gcGxheXMuIFdlIHdpbGwgc3RhcnQgYnkgZmlyc3QgaW1wbGVtZW50aW5nIHNlbnRpbWVudCBhbmFseXNpcyB1c2luZyBgaW5uZXJfam9pbigpYCwgYW5kIHRoZW4gdXNlIGBjb3VudCgpYCB3aXRoIGZvdXIgYXJndW1lbnRzOgoKKiBgdGl0bGVgLAoqIGB0eXBlYCwKKiBhbiBgaW5kZXhgIHRoYXQgd2lsbCBzZWN0aW9uIHRvZ2V0aGVyIGxpbmVzIG9mIHRoZSBwbGF5LCBhbmQKKiBgc2VudGltZW50YC4KCkFmdGVyIHRoZXNlIGxpbmVzIG9mIGNvZGUsIHlvdSB3aWxsIGhhdmUgdGhlIG51bWJlciBvZiBwb3NpdGl2ZSBhbmQgbmVnYXRpdmUgd29yZHMgdXNlZCBpbiBlYWNoIGBpbmRleGAtZWQgc2VjdGlvbiBvZiB0aGUgcGxheS4gVGhlc2Ugc2VjdGlvbnMgd2lsbCBiZSA3MCBsaW5lcyBsb25nIGluIHlvdXIgYW5hbHlzaXMgaGVyZS4gWW91IHdhbnQgYSBjaHVuayBvZiB0ZXh0IHRoYXQgaXMgbm90IHRvbyBzbWFsbCAoYmVjYXVzZSB0aGVuIHRoZSBzZW50aW1lbnQgY2hhbmdlcyB3aWxsIGJlIHZlcnkgbm9pc3kpIGFuZCBub3QgdG9vIGJpZyAoYmVjYXVzZSB0aGVuIHlvdSB3aWxsIG5vdCBiZSBhYmxlIHRvIHNlZSBwbG90IHN0cnVjdHVyZSkuIEluIGFuIGFuYWx5c2lzIG9mIHRoaXMgdHlwZSB5b3UgbWF5IG5lZWQgdG8gZXhwZXJpbWVudCB3aXRoIHdoYXQgc2l6ZSBjaHVua3MgdG8gbWFrZTsgc2VjdGlvbnMgb2YgNzAgbGluZXMgd29ya3Mgd2VsbCBmb3IgdGhlc2UgcGxheXMuCgojIyMjIEluc3RydWN0aW9ucwoqIEltcGxlbWVudCBzZW50aW1lbnQgYW5hbHlzaXMgdXNpbmcgdGhlIGAiYmluZyJgIGxleGljb24uCiogVXNlIGBjb3VudCgpYCB0byBmaW5kIHRoZSBudW1iZXIgb2Ygd29yZHMgZm9yIGVhY2ggc2VudGltZW50IHVzZWQgaW4gZWFjaCBwbGF5IGluIHNlY3Rpb25zLCB1c2luZyBmb3VyIGFyZ3VtZW50cy4KKiBUaGUgZmlyc3QgYXJndW1lbnQgZm9yIGBjb3VudCgpYCBtYXBzIHRvIHRoZSBwbGF5cyB0aGVtc2VsdmVzLgoqIFRoZSBzZWNvbmQgYXJndW1lbnQga2VlcHMgdHJhY2sgb2Ygd2hldGhlciB0aGUgcGxheSBpcyBhIGNvbWVkeSBvciB0cmFnZWR5LgoqIFRoZSB0aGlyZCBhcmd1bWVudCBpcyBkZWZpbmVkIGJ5IHlvdTsgY2FsbCBpdCBpbmRleCBhbmQgc2V0IGl0IGVxdWFsIHRvIGBsaW5lbnVtYmVyICUvJSA3MGAuIFRoaXMgaW5kZXggbWFrZXMgY2h1bmtzIG9mIHRleHQgdGhhdCBhcmUgNzAgbGluZXMgbG9uZyB1c2luZyBpbnRlZ2VyIGRpdmlzaW9uIChgJS8lYCkuCiogVGhlIGZvdXJ0aCBhcmd1bWVudCBtYXBzIHRvIHRoZSBkaWZmZXJlbnQgc2VudGltZW50IGNhdGVnb3JpZXMuCgpgYGB7cn0KdGlkeV9zaGFrZXNwZWFyZSAlPiUgCiAgaW5uZXJfam9pbihnZXRfc2VudGltZW50cygiYmluZyIpKSAlPiUgCiAgY291bnQodGl0bGUsIHR5cGUsIGluZGV4ID0gbGluZW51bWJlciAlLyUgNzAsIHNlbnRpbWVudCkgIyMgVkVSWSBJTVBPUlRBTlQgVE8gUkVNRU1CRVIgVEhJUyBDT0RFICAKYGBgCgojIyBDYWxjdWxhdGluZyBuZXQgc2VudGltZW50CgpOb3cgeW91IHdpbGwgYnVpbGQgb24gdGhlIGNvZGUgZnJvbSB0aGUgcHJldmlvdXMgZXhlcmNpc2UgYW5kIGNvbnRpbnVlIHRvIG1vdmUgZm9yd2FyZCB0byBzZWUgaG93IHNlbnRpbWVudCBjaGFuZ2VzIHRocm91Z2ggdGhlc2UgU2hha2VzcGVhcmVhbiBwbGF5cy4gVGhlIG5leHQgc3RlcHMgaW52b2x2ZSBgc3ByZWFkKClgIGZyb20gdGhlIHRpZHlyIHBhY2thZ2UuIEFmdGVyIHRoZXNlIGxpbmVzIG9mIGNvZGUsIHlvdSB3aWxsIGhhdmUgdGhlIG5ldCBzZW50aW1lbnQgaW4gZWFjaCBpbmRleC1lZCBzZWN0aW9uIG9mIHRoZSBwbGF5OyBuZXQgc2VudGltZW50IGlzIHRoZSBuZWdhdGl2ZSBzZW50aW1lbnQgc3VidHJhY3RlZCBmcm9tIHRoZSBwb3NpdGl2ZSBzZW50aW1lbnQuCgojIyMjIEluc3RydWN0aW9ucwoqIExvYWQgdGhlIGB0aWR5cmAgcGFja2FnZS4KKiBVc2UgYHNwcmVhZCgpYCB0byBzcHJlYWQgc2VudGltZW50IGFuZCBuIGFjcm9zcyBtdWx0aXBsZSBjb2x1bW5zLgoqIFRha2UgYSBsb29rIGF0IHRoZSBvdXRwdXQgb2YgdGhlIHByb2Nlc3MgYWZ0ZXIgdGhlIGBzcHJlYWQoKWAgbGluZSBpbiB0aGUgY29uc29sZS4KKiBNYWtlIGEgbmV3IGNvbHVtbiB1c2luZyBgbXV0YXRlKClgIHRoYXQgaGFzIHRoZSBuZXQgc2VudGltZW50IGZvdW5kIGJ5IHN1YnRyYWN0aW5nIG5lZ2F0aXZlIHNlbnRpbWVudCBmcm9tIHBvc2l0aXZlLgoKYGBge3J9CmxpYnJhcnkodGlkeXIpCnRpZHlfc2hha2VzcGVhcmUgJT4lIAogIGlubmVyX2pvaW4oZ2V0X3NlbnRpbWVudHMoImJpbmciKSkgJT4lIAogIGNvdW50KHRpdGxlLCB0eXBlLCBpbmRleCA9IGxpbmVudW1iZXIgJS8lIDcwLCBzZW50aW1lbnQpICU+JSAKICBzcHJlYWQoa2V5ID0gc2VudGltZW50LCB2YWx1ZSA9IG4sIGZpbGwgPSAwKSAlPiUgCiAgbXV0YXRlKHNlbnRpbWVudCA9IHBvc2l0aXZlIC0gbmVnYXRpdmUpCmBgYAoKIyMgVmlzdWFsaXppbmcgbmFycmF0aXZlIGFyY3MKCk5vdywgaW4gdGhpcyBmaW5hbCBleGVyY2lzZSBleHBsb3JpbmcgU2hha2VzcGVhcmVhbiBwbGF5cywgeW91IHdpbGwgY29udGludWUgdG8gYnVpbGQgb24geW91ciBtYW5pcHVsYXRpb25zIG9mIHRoaXMgdGV4dCBkYXRhc2V0IGFuZCB2aXN1YWxpemUgdGhlIHJlc3VsdHMgb2YgdGhpcyBzZW50aW1lbnQgYW5hbHlzaXMuIEhvdyBkb2VzIHNlbnRpbWVudCBjaGFuZ2UgdGhyb3VnaCB0aGUgbmFycmF0aXZlIGFyY3Mgb2YgdGhlc2Ugc2l4IHBsYXlzIGJ5IFNoYWtlc3BlYXJlPwoKIyMjIyBJbnN0cnVjdGlvbnMKKiBMb2FkIHRoZSBnZ3Bsb3QyIHBhY2thZ2UuCiogUHV0IGBpbmRleGAgb24gdGhlIHgtYXhpcywgYHNlbnRpbWVudGAgb24gdGhlIHktYXhpcywgYW5kIHVzZSBgdHlwZWAgZm9yIGBmaWxsYC4KKiBVc2UgYGdlb21fY29sKClgIHRvIG1ha2UgYSBiYXIgY2hhcnQuIChJZiB5b3UgYXJlIGZhbWlsaWFyIHdpdGggYGdlb21fYmFyKHN0YXQgPSAiaWRlbnRpdHkiKWAsIGBnZW9tX2NvbCgpYCBkb2VzIHRoZSBzYW1lIHRoaW5nLikKKiBDYWxsIGBmYWNldF93cmFwKClgIHRvIG1ha2UgYSBzZXBhcmF0ZSBwYW5lbCBmb3IgZWFjaCB0aXRsZTsgYmUgc3VyZSB0byBhZGQgYHNjYWxlcyA9ICJmcmVlX3giYCBzbyB0aGUgeC1heGVzIGJlaGF2ZSBuaWNlbHkuCgpgYGB7cn0KbGlicmFyeShnZ3Bsb3QyKQoKdGlkeV9zaGFrZXNwZWFyZSAlPiUgCiAgaW5uZXJfam9pbihnZXRfc2VudGltZW50cygiYmluZyIpKSAlPiUgCiAgY291bnQodGl0bGUsIHR5cGUsIGluZGV4ID0gbGluZW51bWJlciAlLyUgNzAsIHNlbnRpbWVudCkgJT4lIAogIHNwcmVhZChrZXkgPSBzZW50aW1lbnQsIHZhbHVlID0gbiwgZmlsbCA9IDApICU+JSAKICBtdXRhdGUoc2VudGltZW50ID0gcG9zaXRpdmUgLSBuZWdhdGl2ZSkgJT4lIAogIGdncGxvdChhZXMoeCA9IGluZGV4LCB5ID0gc2VudGltZW50LCBmaWxsID0gdHlwZSkpICsKICBnZW9tX2NvbChzaG93LmxlZ2VuZCA9IEYpICsKICBmYWNldF93cmFwKH4gdGl0bGUsIHNjYWxlcyA9ICJmcmVlX3giKQpgYGAKCgojIDNyZCBTZWdtZW50IC0gQW5hbHl6aW5nIFRWIG5ld3MKCiMjIFRpZHlpbmcgVFYgbmV3cwoKVGFrZSBhIGxvb2sgYXQgdGhlIGRhdGFzZXQgb2YgVFYgbmV3cyB0ZXh0IGFib3V0IGNsaW1hdGUgY2hhbmdlIHlvdSB3aWxsIHVzZSBpbiB0aGlzIGNoYXB0ZXIuIFRoZSBgY2xpbWF0ZV90ZXh0YCBkYXRhc2V0IGNvbnRhaW5zIGFsbW9zdCA2MDAgY2xvc2VkIGNhcHRpb25pbmcgc25pcHBldHMgYW5kIGZvdXIgY29sdW1uczoKCiogYHN0YXRpb25gLCB0aGUgVFYgbmV3cyBzdGF0aW9uIHdoZXJlIHRoZSB0ZXh0IGlzIGZyb20sCiogYHNob3dgLCB0aGUgc2hvdyBvbiB0aGF0IHN0YXRpb24gd2hlcmUgdGhlIHRleHQgd2FzIHNwb2tlbiwKKiBgc2hvd19kYXRlYCwgdGhlIGJyb2FkY2FzdCBkYXRlIG9mIHRoZSBzcG9rZW4gdGV4dCwgYW5kCiogYHRleHRgLCB0aGUgYWN0dWFsIHRleHQgc3Bva2VuIG9uIFRWLgoKVHlwZSBgY2xpbWF0ZV90ZXh0YCBpbiB0aGUgY29uc29sZSB0byB0YWtlIGEgbG9vayBhdCB0aGUgZGF0YXNldCBiZWZvcmUgZ2V0dGluZyBzdGFydGVkIHdpdGggdHJhbnNmb3JtaW5nIGl0IHRvIGEgdGlkeSBmb3JtYXQuCgojIyMjIEluc3RydWN0aW9ucwoqIExvYWQgdGhlIGB0aWR5dGV4dGAgcGFja2FnZS4KKiBQaXBlIHRoZSBvcmlnaW5hbCBkYXRhc2V0IHRvIHRoZSBuZXh0IGxpbmUuCiogVXNlIGB1bm5lc3RfdG9rZW5zKClgIHRvIHRyYW5zZm9ybSB0aGUgbm9uLXRpZHkgdGV4dCBkYXRhIHRvIGEgdGlkeSB0ZXh0IGRhdGFzZXQsIHdpdGggYSBgd29yZGAgY29sdW1uIGluIHRoZSBvdXRwdXQuCgpgYGB7cn0KIyBkYXRhIHByZXAKbG9hZCgiL1VzZXJzL2xiYXJjZWxvL1JfUmVwby9EYXRhQ2FtcC9TZW50aW1lbnQgQW5hbHlzaXMgaW4gUjogVGhlIFRpZHkgV2F5L0RhdGEvY2xpbWF0ZV90ZXh0LnJkYSIpCgpjbGltYXRlX3RleHQKCmxpYnJhcnkodGlkeXRleHQpCgp0aWR5X3R2IDwtIGNsaW1hdGVfdGV4dCAlPiUgCiAgdW5uZXN0X3Rva2VucyhpbnB1dCA9IHRleHQsIG91dHB1dCA9IHdvcmQpCmBgYAoKIyMgQ291bnRpbmcgdG90YWxzCgpOb3cgdGhhdCB5b3UgaGF2ZSB0cmFuc2Zvcm1lZCB0aGUgVFYgbmV3cyBkYXRhIHRvIGEgdGlkeSBkYXRhIHN0cnVjdHVyZSwgeW91IGNhbiBmaW5kIG91dCB3aGF0IHdvcmRzIGFyZSBtb3N0IGNvbW1vbiB3aGVuIGRpc2N1c3NpbmcgY2xpbWF0ZSBjaGFuZ2Ugb24gVFYgbmV3cywgYXMgd2VsbCBhcyB0aGUgdG90YWwgbnVtYmVyIG9mIHdvcmRzIGZyb20gZWFjaCBzdGF0aW9uLiBUaGVzZSBhcmUgYm90aCBoZWxwZnVsIGV4cGxvcmF0b3J5IHN0ZXBzIGJlZm9yZSBtb3Zpbmcgb24gaW4gYW5hbHlzaXMhCgojIyMjIEluc3RydWN0aW9ucwoqIEZpbmQgdGhlIG1vc3QgY29tbW9uIHdvcmRzIGluIHRoaXMgZGF0YXNldCB3aXRoIGBjb3VudCgpYCB1c2luZyBgc29ydCA9IFRSVUVgLiAoVGhlIGNvbW1hbmQgYGFudGlfam9pbihzdG9wX3dvcmRzKWAgcmVtb3ZlcyBjb21tb24gd29yZHMgbGlrZSAiYW5kIiwgIm9mIiwgYW5kICJ0by4iKQoKWW91IHdpbGwgbm93IGNhbGN1bGF0ZSB0aGUgdG90YWwgbnVtYmVyIG9mIHdvcmRzIGZyb20gZWFjaCBzdGF0aW9uLCBhIHF1YW50aXR5IHlvdSdsbCB1c2UgdG8gZmluZCBwcm9wb3J0aW9ucyBsYXRlci4KCiogVXNlIGBjb3VudCgpYCB3aXRoIG9uZSBhcmd1bWVudCB0byBmaW5kIGhvdyBtYW55IHdvcmRzIGNhbWUgZnJvbSBlYWNoIHN0YXRpb25zLgoqIENoYW5nZSB0aGUgbmFtZSBvZiB0aGUgbmV3IGNvbHVtbiB3aXRoIGByZW5hbWUoKWAgc28gdGhhdCBpdCBpcyBjYWxsZWQgYHN0YXRpb25fdG90YWxgIGluc3RlYWQgb2YgYG5gLgoKYGBge3J9CnRpZHlfdHYgJT4lIAogIGFudGlfam9pbihzdG9wX3dvcmRzKSAlPiUgI3JlbW92ZXMgc3RvcCB3b3Jkcy4gZGF0YXNldCBpcyBpbmNsdWRlZCBpbiB0aGUgdGlkeXRleHQgbGlicmFyeQogIGNvdW50KHdvcmQsIHNvcnQgPSBUKQoKdGlkeV90diAlPiUgCiAgY291bnQoc3RhdGlvbikgJT4lIAogIHJlbmFtZShzdGF0aW9uX3RvdGFsID0gbikKYGBgCgojIyBTZW50aW1lbnQgYW5hbHlzaXMgb2YgVFYgbmV3cwoKQWZ0ZXIgdHJhbnNmb3JtaW5nIHRoZSBUViBuZXdzIHRleHRzIHRvIGEgdGlkeSBmb3JtYXQgaW4gYSBwcmV2aW91cyBleGVyY2lzZSwgdGhlIHJlc3VsdGluZyBkYXRhIGZyYW1lIGB0aWR5X3R2YCBpcyByZWFkeSBmb3Igc2VudGltZW50IGFuYWx5c2lzIHVzaW5nIHRpZHkgZGF0YSBwcmluY2lwbGVzLiBCZWZvcmUgeW91IGltcGxlbWVudCB0aGUgaW5uZXIgam9pbiwgYWRkIG5ldyBjb2x1bW4gd2l0aCB0aGUgdG90YWwgbnVtYmVyIG9mIHdvcmRzIGZyb20gZWFjaCBzdGF0aW9uIHNvIHlvdSBjYW4gY2FsY3VsYXRlIHByb3BvcnRpb25zIHNvb24uCgojIyMjIEluc3RydWN0aW9ucwoqIERlZmluZSBncm91cHMgZm9yIGVhY2ggc3RhdGlvbiBpbiB0aGUgZGF0YXNldCB1c2luZyBgZ3JvdXBfYnkoKWAuCiogTWFrZSBhIG5ldyBjb2x1bW4gY2FsbGVkIGBzdGF0aW9uX3RvdGFsYCBpbiB0aGUgZGF0YWZyYW1lIHRoYXQgdGFsbGllcyB0aGUgdG90YWwgbnVtYmVyIG9mIHdvcmRzIGZyb20gZWFjaCBzdGF0aW9uOyB0aGUgYG11dGF0ZSgpYCB2ZXJiIHdpbGwgbWFrZSBhIG5ldyBjb2x1bW4gYW5kIHRoZSBmdW5jdGlvbiBgbigpYCBjb3VudHMgdGhlIG51bWJlciBvZiBvYnNlcnZhdGlvbnMgaW4gdGhlIGN1cnJlbnQgZ3JvdXAuCiogRmluYWxseSwgaW1wbGVtZW50IHNlbnRpbWVudCBhbmFseXNpcyB1c2luZyB0aGUgY29ycmVjdCBraW5kIG9mIGpvaW4gYW5kIHRoZSBgIm5yYyJgIGxleGljb24gYXMgdGhlIGFyZ3VtZW50IHRvIHRoZSBqb2luIGZ1bmN0aW9uLgoKYGBge3J9CnR2X3NlbnRpbWVudCA8LSB0aWR5X3R2ICU+JSAKICBncm91cF9ieShzdGF0aW9uKSAlPiUgCiAgbXV0YXRlKHN0YXRpb25fdG90YWwgPSBuKCkpICU+JSAKICB1bmdyb3VwKCkgJT4lIAogIGlubmVyX2pvaW4oZ2V0X3NlbnRpbWVudHMoIm5yYyIpKQpgYGAKCiMjIFdoaWNoIHN0YXRpb24gdXNlcyB0aGUgbW9zdCBwb3NpdGl2ZSBvciBuZWdhdGl2ZSB3b3Jkcz8KCllvdSBwZXJmb3JtZWQgc2VudGltZW50IGFuYWx5c2lzIG9uIHRoaXMgZGF0YXNldCBvZiBUViBuZXdzIHRleHQsIGFuZCB0aGUgcmVzdWx0cyBhcmUgYXZhaWxhYmxlIGluIHlvdXIgZW52aXJvbm1lbnQgaW4gYHR2X3NlbnRpbWVudGAuIEhvdyBkbyB0aGUgd29yZHMgdXNlZCB3aGVuIGRpc2N1c3NpbmcgY2xpbWF0ZSBjaGFuZ2UgY29tcGFyZSBhY3Jvc3Mgc3RhdGlvbnM/IFdoaWNoIHN0YXRpb25zIHVzZSBtb3JlIHBvc2l0aXZlIHdvcmRzPyBNb3JlIG5lZ2F0aXZlIHdvcmRzPwoKIyMjIyBJbnN0cnVjdGlvbnMKClN0YXJ0IG9mZiBieSBsb29raW5nIGF0IG5lZ2F0aXZlIHdvcmRzLgoKKiBEZWZpbmUgYSBuZXcgY29sdW1uIGBwZXJjZW50YCB1c2luZyBtdXRhdGUoKSB0aGF0IGlzIGBuYCBkaXZpZGVkIGJ5IGBzdGF0aW9uX3RvdGFsYCwgdGhlIHByb3BvcnRpb24gb2Ygd29yZHMgdGhhdCBiZWxvbmcgdG8gdGhhdCBzZW50aW1lbnQuCiogRmlsdGVyIG9ubHkgZm9yIHRoZSBuZWdhdGl2ZSBzZW50aW1lbnQgcm93cy4KKiBBcnJhbmdlIGJ5IGBwZXJjZW50YCBzbyB5b3UgY2FuIHNlZSB0aGUgcmVzdWx0cyBzb3J0ZWQgYnkgcHJvcG9ydGlvbiBvZiBuZWdhdGl2ZSB3b3Jkcy4KCk5vdyByZXBlYXQgdGhlc2Ugc3RlcHMgdG8gZXhhbWluZSBwb3NpdGl2ZSB3b3JkcyEKCmBgYHtyfQp0dl9zZW50aW1lbnQgJT4lIAogIGNvdW50KHN0YXRpb24sIHNlbnRpbWVudCwgc3RhdGlvbl90b3RhbCkgJT4lIAogIG11dGF0ZShwZXJjZW50ID0gbiAvIHN0YXRpb25fdG90YWwpICU+JQogIGZpbHRlcihzZW50aW1lbnQgPT0gIm5lZ2F0aXZlIikgJT4lIAogIGFycmFuZ2UocGVyY2VudCkKCnR2X3NlbnRpbWVudCAlPiUgCiAgY291bnQoc3RhdGlvbiwgc2VudGltZW50LCBzdGF0aW9uX3RvdGFsKSAlPiUgCiAgbXV0YXRlKHBlcmNlbnQgPSBuIC8gc3RhdGlvbl90b3RhbCkgJT4lCiAgZmlsdGVyKHNlbnRpbWVudCA9PSAicG9zaXRpdmUiKSAlPiUgCiAgYXJyYW5nZShwZXJjZW50KQpgYGAKCiMjIFdoaWNoIHdvcmRzIGNvbnRyaWJ1dGUgdG8gdGhlIHNlbnRpbWVudCBzY29yZXM/CgpJdCdzIGltcG9ydGFudCB0byB1bmRlcnN0YW5kIHdoaWNoIHdvcmRzIHNwZWNpZmljYWxseSBhcmUgZHJpdmluZyBzZW50aW1lbnQgc2NvcmVzLCBhbmQgd2hlbiB5b3UgdXNlIHRpZHkgZGF0YSBwcmluY2lwbGVzLCBpdCdzIG5vdCB0b28gZGlmZmljdWx0IHRvIGNoZWNrLiBJbiB0aGlzIGV4ZXJjaXNlLCB5b3Ugd2lsbCBtYWtlIGEgcGxvdCBzaG93aW5nIHdoaWNoIHdvcmRzIGNvbnRyaWJ1dGUgdGhlIG1vc3QgdG8gdGhlIHRlbiB0eXBlcyBvZiBzZW50aW1lbnQgaW4gdGhlIE5SQyBsZXhpY29uLiBMb29rIGF0IHRoZSByZXN1bHQsIGFuZCB0aGluayBhYm91dCB3aGljaCB3b3JkcyBtaWdodCBub3QgYmUgYXBwcm9wcmlhdGUgaW4gdGhlc2UgY29udGV4dHMuIEFyZSB0aGVyZSBwcm9wZXIgbmFtZXM/IEFyZSB0aGVyZSB3b3JkcyB3aGljaCB1c2VkIGluIHRoZXNlIGNvbnRleHRzIGFyZSBuZXV0cmFsPwoKSWYgc28sIHlvdSBjYW4gYWx3YXlzIHJlbW92ZSB0aGVzZSB3b3JkcyBmcm9tIHlvdXIgZGF0YXNldCAob3IgdGhlIHNlbnRpbWVudCBsZXhpY29uKSB1c2luZyBgYW50aV9qb2luKClgLgoKIyMjIyBJbnN0cnVjdGlvbnMKKiBDb3VudCBieSB3b3JkIGFuZCBzZW50aW1lbnQgdG8gZmluZCB3aGljaCB3b3JkcyBhcmUgY29udHJpYnV0aW5nIG1vc3Qgb3ZlcmFsbCB0byB0aGUgc2VudGltZW50IHNjb3Jlcy4KKiBHcm91cCBieSBzZW50aW1lbnQuCiogVGFrZSB0aGUgdG9wIDEwIHdvcmRzIGZvciBlYWNoIHNlbnRpbWVudCB1c2luZyBgdG9wX24oKWAuCiogU2V0IHVwIHRoZSBwbG90IHVzaW5nIGBhZXMoKWAsIHdpdGggdGhlIHdvcmRzIG9uIHRoZSB4LWF4aXMsIHRoZSBudW1iZXIgb2YgdXNlcyBgbmAgb24gdGhlIHktYXhpcywgYW5kIGZpbGwgY29ycmVzcG9uZGluZyB0byBzZW50aW1lbnQuCgpgYGB7cn0KdHZfc2VudGltZW50ICU+JSAKICBjb3VudChzZW50aW1lbnQsIHdvcmQpICU+JSAKICBncm91cF9ieShzZW50aW1lbnQpICU+JSAKICB0b3BfbigxMCkgJT4lIAogIHVuZ3JvdXAoKSAlPiUgCiAgbXV0YXRlKHdvcmQgPSByZW9yZGVyKHdvcmQsIG4pKSAlPiUgCiAgZ2dwbG90KGFlcyh4ID0gd29yZCwgeSA9IG4sIGZpbGwgPSBzZW50aW1lbnQpKSArCiAgZ2VvbV9jb2woc2hvdy5sZWdlbmQgPSBGQUxTRSkgKwogIGZhY2V0X3dyYXAofnNlbnRpbWVudCwgc2NhbGVzID0gImZyZWUiKSArCiAgY29vcmRfZmxpcCgpCmBgYAoKIyMgV29yZCBjaG9pY2UgYW5kIFRWIHN0YXRpb24KCkluIHRoZSBsYXN0IGV4ZXJjaXNlLCB5b3Ugc2F3IHdoaWNoIHdvcmRzIGNvbnRyaWJ1dGVkIHRvIHdoaWNoIHNlbnRpbWVudCBmb3IgdGhpcyBkYXRhc2V0IG9mIGNsb3NlZCBjYXB0aW9uaW5nIHRleHRzIGFib3V0IGNsaW1hdGUgY2hhbmdlIGZyb20gVFYgbmV3cyBzdGF0aW9uLiBOb3cgaXQncyB0aW1lIHRvIGV4cGxvcmUgdGhlIGRpZmZlcmVudCB3b3JkcyB0aGF0IGVhY2ggc3RhdGlvbiB1c2VkIGluIHRoZSBjb250ZXh0IG9mIGRpc2N1c3NpbmcgY2xpbWF0ZSBjaGFuZ2UuIFdoaWNoIG5lZ2F0aXZlIHdvcmRzIGRpZCBlYWNoIHN0YXRpb24gdXNlIHdoZW4gdGFsa2luZyBhYm91dCBjbGltYXRlIGNoYW5nZSBvbiB0aGUgYWlyPwoKIyMgSW5zdHJ1Y3Rpb25zCiogRmlsdGVyIGZvciBvbmx5IG5lZ2F0aXZlIHdvcmRzLgoqIENvdW50IGJ5IHdvcmQgYW5kIHN0YXRpb24gdG8gZmluZCB3aGljaCB3b3JkcyBhcmUgY29udHJpYnV0aW5nIG1vc3Qgb3ZlcmFsbCB0byB0aGUgc2VudGltZW50IHNjb3Jlcy4KKiBHcm91cCBieSBUViBzdGF0aW9uLgoqIFRha2UgdGhlIHRvcCAxMCB3b3JkcyBmb3IgZWFjaCBzdGF0aW9uLgoqIFNldCB1cCB0aGUgcGxvdCB1c2luZyBgYWVzKClgLCB3aXRoIHRoZSB3b3JkcyBvbiB0aGUgeC1heGlzLCB0aGUgbnVtYmVyIG9mIHVzZXMgYG5gIG9uIHRoZSB5LWF4aXMsIGFuZCBgZmlsbGAgY29ycmVzcG9uZGluZyB0byBzdGF0aW9uLgoKYGBge3J9CnR2X3NlbnRpbWVudCAlPiUgCiAgZmlsdGVyKHNlbnRpbWVudCA9PSAibmVnYXRpdmUiKSAlPiUgCiAgY291bnQod29yZCwgc3RhdGlvbikgJT4lIAogIGdyb3VwX2J5KHN0YXRpb24pICU+JSAKICB0b3BfbigxMCwgd3QgPSBuKSAlPiUgCiAgdW5ncm91cCgpICU+JSAKICBtdXRhdGUod29yZCA9IHJlb3JkZXIocGFzdGUod29yZCwgc3RhdGlvbiwgc2VwID0gIl9fIiksIG4pKSAlPiUgIyMgd2l0aG91dCB0aGlzIGl0IGlzIG5vdCB3ZWxsIG9yZGVyZWQuCiAgZ2dwbG90KGFlcyh4ID0gd29yZCwgeSA9IG4sIGZpbGwgPSBzdGF0aW9uKSkgKwogIGdlb21fY29sKHNob3cubGVnZW5kID0gRikgKwogIHNjYWxlX3hfZGlzY3JldGUobGFiZWxzID0gZnVuY3Rpb24oeCkgZ3N1YigiX18uKyQiLCAiIiwgeCkpICsKICBmYWNldF93cmFwKH5zdGF0aW9uLCBucm93ID0gMiwgc2NhbGVzID0gImZyZWUiKSArCiAgY29vcmRfZmxpcCgpCmBgYAoKIyMgVmlzdWFsaXppbmcgc2VudGltZW50IG92ZXIgdGltZQoKWW91IGhhdmUgY29tcGFyZWQgaG93IFRWIHN0YXRpb25zIHVzZSBwb3NpdGl2ZSBhbmQgbmVnYXRpdmUgd29yZHM7IG5vdyBpdCBpcyB0aW1lIHRvIHNlZSBob3cgc2VudGltZW50IGlzIGNoYW5naW5nIG92ZXIgdGltZS4gQXJlIFRWIG5ld3Mgc3RhdGlvbnMgdXNpbmcgbW9yZSBuZWdhdGl2ZSB3b3JkcyBhcyB0aW1lIHBhc3Nlcz8gTW9yZSBwb3NpdGl2ZSB3b3Jkcz8gWW91IHdpbGwgdXNlIGEgZnVuY3Rpb24gY2FsbGVkIGBmbG9vcl9kYXRlKClgIGZyb20gdGhlIGBsdWJyaWRhdGVgIHBhY2thZ2UgdG8gY291bnQgdXNlcyBvZiBwb3NpdGl2ZSBhbmQgbmVnYXRpdmUgd29yZHMgb3ZlciB0aW1lLgoKVGhlIGB0aWR5X3R2YCBkYXRhZnJhbWUgeW91IGNyZWF0ZWQgbmVhciB0aGUgYmVnaW5uaW5nIG9mIHRoaXMgY2hhcHRlciBpcyBhdmFpbGFibGUgaW4geW91ciBlbnZpcm9ubWVudC4KCiMjIyMgSW5zdHJ1Y3Rpb25zCiogTG9hZCB0aGUgYGx1YnJpZGF0ZWAgcGFja2FnZS4KKiBEZWZpbmUgdGhlIG5ldyBjb2x1bW4gd2l0aCBhIGBtdXRhdGUoKWAgc3RhdGVtZW50IHVzaW5nIHRoZSBgZmxvb3JfZGF0ZSgpYCBmdW5jdGlvbiwgcm91bmRpbmcgZWFjaCBkYXRlIGRvd24gdG8gdGhlIG5lYXJlc3QgNi1tb250aCB1bml0LgoqIEdyb3VwIGJ5IHRoZSBuZXcgYGRhdGVgIGNvbHVtbiAoZWFjaCA2IG1vbnRocykuCiogSW1wbGVtZW50IHNlbnRpbWVudCBhbmFseXNpcyB1c2luZyB0aGUgY29ycmVjdCBraW5kIG9mIGpvaW4gYW5kIHRoZSBgIm5yYyJgIHNlbnRpbWVudCBsZXhpY29uLgoKTm93IHlvdSBoYXZlIGEgZGF0YWZyYW1lIHdpdGggdGhlIG51bWJlciBvZiB3b3JkcyBwZXIgc2VudGltZW50IHBlciA2IG1vbnRocywgYXMgd2VsbCBhcyB0aGUgdG90YWwgd29yZHMgdXNlZCBpbiBlYWNoIDYgbW9udGhzIQoKKiBGaWx0ZXIgZm9yIGJvdGggcG9zaXRpdmUgYW5kIG5lZ2F0aXZlIHdvcmRzIHNvIHlvdSBjYW4gcGxvdCBib3RoLgoqIENvdW50IHdpdGggdGhyZWUgYXJndW1lbnRzOiBkYXRlLCBzZW50aW1lbnQsIGFuZCB0aGUgdG90YWwgbnVtYmVyIG9mIHdvcmRzLgoqIFNldCB1cCB5b3VyIHBsb3Qgd2l0aCBgYWVzKClgIGFuZCBwdXQgZGF0ZSBvbiB0aGUgeC1heGlzLCBwZXJjZW50IG9uIHRoZSB5LWF4aXMsIGFuZCBoYXZlIGNvbG9yIGNvcnJlc3BvbmQgdG8gc2VudGltZW50LgoKYGBge3J9CmxpYnJhcnkobHVicmlkYXRlKQoKc2VudGltZW50X2J5X3RpbWUgPC0gdGlkeV90diAlPiUgCiAgbXV0YXRlKGRhdGUgPSBmbG9vcl9kYXRlKHggPSBzaG93X2RhdGUsIHVuaXQgPSAiNiBtb250aHMiKSkgJT4lIAogIGdyb3VwX2J5KGRhdGUpICU+JSAKICBtdXRhdGUodG90YWxfd29yZHMgPSBuKCkpICU+JSAKICB1bmdyb3VwKCkgJT4lIAogIGlubmVyX2pvaW4oZ2V0X3NlbnRpbWVudHMoIm5yYyIpKQoKc2VudGltZW50X2J5X3RpbWUgJT4lIAogIGZpbHRlcihzZW50aW1lbnQgPT0gInBvc2l0aXZlIiB8IHNlbnRpbWVudCA9PSAibmVnYXRpdmUiKSAlPiUgCiAgY291bnQoZGF0ZSwgc2VudGltZW50LCB0b3RhbF93b3JkcykgJT4lIAogIHVuZ3JvdXAoKSAlPiUgCiAgbXV0YXRlKHBlcmNlbnQgPSBuIC8gdG90YWxfd29yZHMpICU+JSAKICBnZ3Bsb3QoYWVzKHggPSBkYXRlLCB5ID0gcGVyY2VudCwgY29sID0gc2VudGltZW50KSkgKwogIGdlb21fbGluZShzaXplID0gMS41KSArCiAgZ2VvbV9zbW9vdGgobWV0aG9kID0gImxtIiwgc2UgPSBGLCBsdHkgPSAyKSArCiAgZXhwYW5kX2xpbWl0cyh5ID0gMCkKYGBgCgojIyBXb3JkIGNoYW5nZXMgb3ZlciB0aW1lCgpZb3UgY2FuIGFsc28gdXNlIHRpZHkgZGF0YSBwcmluY2lwbGVzIHRvIGV4cGxvcmUgaG93IGluZGl2aWR1YWwgd29yZHMgaGF2ZSBiZWVuIHVzZWQgb3ZlciB0aW1lLiBJbiB0aGUgZmluYWwgZXhlcmNpc2Ugb2YgdGhpcyBjaGFwdGVyLCB5b3Ugd2lsbCB0YWtlIHRoZSBgdGlkeV90dmAgZGF0YWZyYW1lIHlvdSBjcmVhdGVkIGVhcmxpZXIgYW5kIG1ha2UgYSBwbG90IHRvIHNlZSBob3cgY2VydGFpbiB3b3JkcyB1c2VkIGluIHRoZSBjb250ZXh0IG9mIGNsaW1hdGUgY2hhbmdlIGhhdmUgY2hhbmdlZCBpbiB1c2Ugb3ZlciB0aW1lLiBZb3Ugd2lsbCBhZ2FpbiB1c2UgdGhlIGBmbG9vcl9kYXRlKClgIGZ1bmN0aW9uLCBidXQgdGhpcyB0aW1lIHRvIGNvdW50IG1vbnRobHkgdXNlcyBvZiB3b3Jkcy4KCiMjIyMgSW5zdHJ1Y3Rpb25zCiogRGVmaW5lIGEgbmV3IGNvbHVtbiB3aXRoaW4gdGhlIGBtdXRhdGUoKWAgc3RhdGVtZW50IHdpdGggdGhlIGBmbG9vcl9kYXRlKClgIGZ1bmN0aW9uLCByb3VuZGluZyBlYWNoIGRhdGUgZG93biB0byB0aGUgbmVhcmVzdCAxLW1vbnRoIHVuaXQuCiogQ291bnQgd2l0aCAyIGFyZ3VtZW50czogYGRhdGVgIGFuZCBgd29yZGAuCiogU2V0IHVwIHlvdXIgcGxvdCB3aXRoIGBhZXMoKWAgc28gdGhhdCBgZGF0ZWAgaXMgb24gdGhlIHgtYXhpcywgYG5gICh0aGUgbW9udGhseSBudW1iZXIgb2YgdXNlcykgaXMgb24gdGhlIHktYXhpcyksIGFuZCBjb2xvciBjb3JyZXNwb25kcyB0byBgd29yZGAuCiogVXNlIGBmYWNldF93cmFwYCB0byBtYWtlIGEgc2VwYXJhdGUgcGFuZWwgaW4geW91ciBwbG90IGZvciBlYWNoIHdvcmQuCgpgYGB7cn0KdGlkeV90diAlPiUgCiAgbXV0YXRlKGRhdGUgPSBmbG9vcl9kYXRlKHNob3dfZGF0ZSwgdW5pdCA9ICIxIG1vbnRoIikpICU+JSAKICBmaWx0ZXIod29yZCAlaW4lIGMoInRocmVhdCIsICJob2F4IiwgImRlbmllciIsICJyZWFsIiwgIndhcm1pbmciLCAiaHVycmljYW5lIikpICU+JSAKICBjb3VudChkYXRlLCB3b3JkKSAlPiUgCiAgdW5ncm91cCgpICU+JSAKICBnZ3Bsb3QoYWVzKHggPSBkYXRlLCB5ID0gbiwgY29sID0gd29yZCkpICsKICBnZW9tX2xpbmUoc2l6ZSA9IDEuNSwgc2hvdy5sZWdlbmQgPSBGQUxTRSkgKwogIGZhY2V0X3dyYXAoIH4gd29yZCkgKwogIGV4cGFuZF9saW1pdHMoeSA9IDApCmBgYAoKIyA0dGggU2VnbWVudCAtIFNpbmdpbmcgYSBIYXBweSBTb25nIChvciBTYWQ/ISkKCiMjIFRpZHlpbmcgc29uZyBseXJpY3MKCkxldCdzIHRha2UgYSBsb29rIGF0IHRoZSBkYXRhc2V0IHlvdSB3aWxsIHVzZSBpbiB0aGlzIGZpbmFsIGNoYXB0ZXIgdG8gcHJhY3RpY2UgeW91ciBzZW50aW1lbnQgYW5hbHlzaXMgc2tpbGxzLiBUaGUgYHNvbmdfbHlyaWNzYCBkYXRhc2V0IGNvbnRhaW5zIGZpdmUgY29sdW1uczoKCiogYHJhbmtgLCB0aGUgcmFuayBhIHNvbmcgYWNoaWV2ZWQgb24gdGhlIEJpbGxib2FyZCBZZWFyLUVuZCBIb3QgMTAwLAoqIGBzb25nYCwgdGhlIHNvbmcncyB0aXRsZSwKKiBgYXJ0aXN0YCwgdGhlIGFydGlzdCB3aG8gcmVjb3JkZWQgdGhlIHNvbmcsCiogYHllYXJgLCB0aGUgeWVhciB0aGUgc29uZyByZWFjaGVkIHRoZSBnaXZlbiByYW5rIG9uIHRoZSBCaWxsYm9hcmQgY2hhcnQsIGFuZAoqIGBseXJpY3NgLCB0aGUgbHlyaWNzIG9mIHRoZSBzb25nLgoKVGhpcyBkYXRhc2V0IGNvbnRhaW5zIG92ZXIgNTAwMCBzb25ncywgZnJvbSAxOTY1IHRvIHRoZSBwcmVzZW50LiBUaGUgbHlyaWNzIGFyZSBhbGwgaW4gb25lIGNvbHVtbiwgc28gdGhleSBhcmUgbm90IHlldCBpbiBhIHRpZHkgZm9ybWF0LCByZWFkeSBmb3IgYW5hbHlzaXMgdXNpbmcgdGlkeSB0b29scy4gSXQncyB5b3VyIHR1cm4gdG8gdGlkeSB0aGlzIHRleHQgZGF0YSEKCiMjIyMgSW5zdHJ1Y3Rpb25zCiogTG9hZCB0aGUgYHRpZHl0ZXh0YCBwYWNrYWdlLgoqIFBpcGUgdGhlIGBzb25nX2x5cmljc2Agb2JqZWN0IHRvIHRoZSBuZXh0IGxpbmUuCiogVXNlIGB1bm5lc3RfdG9rZW5zKClgIHRvIHVubmVzdCB0aGUgbHlyaWNzIGNvbHVtbiBpbnRvIGEgbmV3IGB3b3JkYCBjb2x1bW4uCgpgYGB7cn0KIyBkYXRhIHByZXAKbG9hZCgiL1VzZXJzL2xiYXJjZWxvL1JfUmVwby9EYXRhQ2FtcC9TZW50aW1lbnQgQW5hbHlzaXMgaW4gUjogVGhlIFRpZHkgV2F5L0RhdGEvc29uZ19seXJpY3MucmRhIikKCmxpYnJhcnkodGlkeXRleHQpCnRpZHlfbHlyaWNzIDwtIHNvbmdfbHlyaWNzICU+JSAKICB1bm5lc3RfdG9rZW5zKGlucHV0ID0gbHlyaWNzLCB3b3JkKQpgYGAKCiMjIENhbGN1bGF0aW5nIHRvdGFsIHdvcmRzIHBlciBzb25nCgpGb3Igc29tZSBuZXh0IHN0ZXBzIGluIHRoaXMgYW5hbHlzaXMsIHlvdSBuZWVkIHRvIGtub3cgdGhlIHRvdGFsIG51bWJlciBvZiB3b3JkcyBzdW5nIGluIGVhY2ggc29uZy4gVXNlIGBjb3VudCgpYCB0byBjb3VudCB1cCB0aGUgd29yZHMgcGVyIHNvbmcsIGFuZCB0aGVuIGBsZWZ0X2pvaW4oKWAgdGhlc2Ugd29yZCB0b3RhbHMgdG8gdGhlIHRpZHkgZGF0YSBzZXQuIFlvdSBjYW4gc3BlY2lmeSBleGFjdGx5IHdoaWNoIGNvbHVtbiB0byB1c2Ugd2hlbiBqb2luaW5nIHRoZSB0d28gZGF0YSBmcmFtZXMgaWYgeW91IGFkZCBgYnkgPSAic29uZyJgLgoKIyMjIyBJbnN0cnVjdGlvbnMKKiBDb3VudCBieSBzb25nIHRvIGZpbmQgdGhlIHdvcmQgdG90YWxzLgoqIFdpdGggdGhlIGByZW5hbWUoKWAgZnVuY3Rpb24sIGNoYW5nZSB0aGUgbmFtZSBvZiB0aGUgbmV3IGBuYCBjb2x1bW4gdG8gYHRvdGFsX3dvcmRzYC4KKiBVc2UgYGxlZnRfam9pbigpYCB0byBjb21iaW5lIHRvdGFsIHdpdGggYHRpZHlfbHlyaWNzYCB1c2luZyB0aGUgYHNvbmdgIGNvbHVtbi4KCmBgYHtyfQp0b3RhbHMgPC0gdGlkeV9seXJpY3MgJT4lCiAgY291bnQoc29uZykgJT4lIAogIHJlbmFtZSh0b3RhbF93b3JkcyA9IG4pCgp0b3RhbHMKCmx5cmljX2NvdW50cyA8LSB0aWR5X2x5cmljcyAlPiUgCiAgbGVmdF9qb2luKHRvdGFscywgYnkgPSBjKCJzb25nIiA9ICJzb25nIikpCmBgYAoKIyMgU2VudGltZW50IGFuYWx5c2lzIG9uIHNvbmcgbHlyaWNzCgpZb3UgaGF2ZSBiZWVuIHByYWN0aWNpbmcgaG93IHRvIGltcGxlbWVudCBzZW50aW1lbnQgYW5hbHlzaXMgd2l0aCBhIGpvaW4gdGhyb3VnaG91dCB0aGlzIGNvdXJzZS4gQWZ0ZXIgdHJhbnNmb3JtaW5nIHRoZSB0ZXh0IG9mIHRoZXNlIHNvbmdzIHRvIGEgdGlkeSB0ZXh0IGRhdGFzZXQgYW5kIHByZXBhcmluZyB0aGUgZGF0YSBmcmFtZSwgdGhlIHJlc3VsdGluZyBkYXRhIGZyYW1lIGBseXJpY19jb3VudHNgIGlzIHJlYWR5IGZvciB5b3UgdG8gcGVyZm9ybSBzZW50aW1lbnQgYW5hbHlzaXMgb25jZSBhZ2Fpbi4gT25jZSB5b3UgaGF2ZSBkb25lIHRoZSBzZW50aW1lbnQgYW5hbHlzaXMsIHlvdSBjYW4gbGVhcm4gd2hpY2ggc29uZ3MgaGF2ZSB0aGUgbW9zdCBzZW50aW1lbnQgd29yZHMgZnJvbSB0aGUgTlJDIGxleGljb24uIFJlbWVtYmVyIHRoYXQgdGhlIE5SQyBsZXhpY29uIGhhcyAxMCBjYXRlZ29yaWVzIG9mIHNlbnRpbWVudDoKCiogYW5nZXIKKiBhbnRpY2lwYXRpb24KKiBkaXNndXN0CiogZmVhcgoqIGpveQoqIG5lZ2F0aXZlCiogcG9zaXRpdmUKKiBzYWRuZXNzCiogc3VycHJpc2UKKiB0cnVzdAoKKiBVc2UgdGhlIGNvcnJlY3Qga2luZCBvZiBqb2luIHRvIGltcGxlbWVudCBzZW50aW1lbnQgYW5hbHlzaXMuCiogQWRkIHRoZSBgIm5yYyJgIGxleGljb24gYXMgdGhlIGFyZ3VtZW50IHRvIHRoZSBqb2luIGZ1bmN0aW9uLgoqIEZpbmQgdGhlIHNvbmdzIHdpdGggdGhlIG1vc3Qgc2VudGltZW50IHdvcmRzIGJ5IHVzaW5nIHR3byBhcmd1bWVudHMgaW4gYGNvdW50KClgLCBhbG9uZyB3aXRoIGBzb3J0ID0gVFJVRWAKCmBgYHtyfQpseXJpY19zZW50aW1lbnQgPC0gbHlyaWNfY291bnRzICU+JSAKICBpbm5lcl9qb2luKGdldF9zZW50aW1lbnRzKCJucmMiKSkgCgpseXJpY19zZW50aW1lbnQgJT4lIAogIGNvdW50KHNvbmcsIHNlbnRpbWVudCwgc29ydCA9IFQpCmBgYAoKIyMgVGhlIG1vc3QgcG9zaXRpdmUgYW5kIG5lZ2F0aXZlIHNvbmdzCgpZb3UgaGF2ZSBzdWNjZXNzZnVsbHkgaW1wbGVtZW50ZWQgc2VudGltZW50IGFuYWx5c2lzIG9uIHRoaXMgZGF0YXNldCBvZiBzb25nIGx5cmljcywgYW5kIG5vdyB5b3UgY2FuIGFzayBxdWVzdGlvbiBzdWNoIGFzLCAiV2hpY2ggc29uZ3MgaGF2ZSB0aGUgaGlnaGVzdCBwcm9wb3J0aW9uIG9mIHBvc2l0aXZlIHdvcmRzPyBPZiBuZWdhdGl2ZSB3b3Jkcz8iIFlvdSBjYWxjdWxhdGVkIHRoZSB0b3RhbCBudW1iZXIgb2Ygd29yZHMgZm9yIGVhY2ggc29uZyBlYXJsaWVyLCBzbyBub3cgeW91IG5lZWQgdG8gY291bnQgdGhlIG51bWJlciBvZiB3b3JkcyBmb3IgZWFjaCBzZW50aW1lbnQgYW5kIHNvbmcuCgojIyMjIEluc3RydWN0aW9ucwoqIFVzZSBgY291bnQoKWAgd2l0aCB0aHJlZSBhcmd1bWVudHMgdG8gZmluZCB0aGUgbnVtYmVyIG9mIHNlbnRpbWVudCB3b3JkcyBmb3IgZWFjaCBzb25nIGFuZCB0b3RhbCBudW1iZXIgb2Ygd29yZHMuCiogTWFrZSBhIG5ldyBjb2x1bW4gdXNpbmcgYG11dGF0ZSgpYCB0aGF0IGlzIG5hbWVkIHBlcmNlbnQsIGVxdWFsIHRvIGBuYCAodGhlIG91dHB1dCBvZiBgY291bnQoKWApIGRpdmlkZWQgYnkgdGhlIGB0b3RhbCBudW1iZXIgb2Ygd29yZHNgLgoqIEZpbHRlciBmb3Igb25seSBuZWdhdGl2ZSB3b3Jkcy4KKiBBcnJhbmdlIGJ5IGRlc2NlbmRpbmcgYHBlcmNlbnRgLgoKTm93IHJlcGVhdCB0aGVzZSBzYW1lIHN0ZXBzIGZvciBwb3NpdGl2ZSB3b3Jkcy4KCmBgYHtyfQpseXJpY19zZW50aW1lbnQgJT4lIAogIGNvdW50KHNvbmcsIHNlbnRpbWVudCwgdG90YWxfd29yZHMpICU+JSAKICB1bmdyb3VwKCkgJT4lIAogIG11dGF0ZShwZXJjZW50ID0gbiAvIHRvdGFsX3dvcmRzKSAlPiUgCiAgZmlsdGVyKHNlbnRpbWVudCA9PSAibmVnYXRpdmUiKSAlPiUgCiAgYXJyYW5nZShkZXNjKHBlcmNlbnQpKQoKbHlyaWNfc2VudGltZW50ICU+JSAKICBjb3VudChzb25nLCBzZW50aW1lbnQsIHRvdGFsX3dvcmRzKSAlPiUgCiAgdW5ncm91cCgpICU+JSAKICBtdXRhdGUocGVyY2VudCA9IG4gLyB0b3RhbF93b3JkcykgJT4lIAogIGZpbHRlcihzZW50aW1lbnQgPT0gInBvc2l0aXZlIikgJT4lIAogIGFycmFuZ2UoZGVzYyhwZXJjZW50KSkKYGBgCgojIyBTZW50aW1lbnQgYW5kIEJpbGxib2FyZCByYW5rCgpUaGUgYGx5cmljX3NlbnRpbWVudGAgZGF0YSBmcmFtZSB0aGF0IHlvdSBjcmVhdGVkIGVhcmxpZXIgYnkgdXNpbmcgYGlubmVyX2pvaW4oKWAgaXMgYXZhaWxhYmxlIGluIHlvdXIgZW52aXJvbm1lbnQuIFlvdSBjYW4gbm93IGV4cGxvcmUgaG93IHRoZSBzZW50aW1lbnQgc2NvcmUgb2YgYSBzb25nIGlzIHJlbGF0ZWQgdG8gb3RoZXIgYXNwZWN0cyBvZiB0aGF0IHNvbmcuIEZpcnN0LCBzdGFydCB3aXRoIEJpbGxib2FyZCByYW5rLCBob3cgaGlnaCBvbiB0aGUgYW5udWFsIEJpbGxib2FyZCBjaGFydCB0aGUgc29uZyByZWFjaGVkLiBEbyBzb25ncyB0aGF0IHVzZSBtb3JlIHBvc2l0aXZlIG9yIG5lZ2F0aXZlIHdvcmRzIGFjaGlldmUgaGlnaGVyIG9yIGxvd2VyIHJhbmtzPyBTdGFydCB3aXRoIHBvc2l0aXZlIHdvcmRzLCBhbmQgbWFrZSBhIHZpc3VhbGl6YXRpb24gdG8gc2VlIGhvdyB0aGVzZSBjaGFyYWN0ZXJpc3RpY3MgYXJlIHJlbGF0ZWQuCgojIyMjIEluc3RydWN0aW9ucwoqIENvdW50IHdpdGggdGhyZWUgYXJndW1lbnRzOiBzb25nLCBCaWxsYm9hcmQgcmFuaywgYW5kIHRoZSB0b3RhbCBudW1iZXIgb2Ygd29yZHMgdGhhdCB5b3UgY2FsY3VsYXRlZCBiZWZvcmUKKiBVc2UgdGhlIGNvcnJlY3QgYGRwbHlyYCBmdW5jdGlvbiB0byBtYWtlIHR3byBuZXcgY29sdW1ucywgYHBlcmNlbnRgIGFuZCBhIHJvdW5kZWQgdmVyc2lvbiBvZiBgcmFua2AKKiBDYWxsIHRoZSBjb3JyZWN0IGBnZ3Bsb3QyYCBgZ2VvbV8qYCB0byBtYWtlIGEgYm94cGxvdAoKYGBge3J9Cmx5cmljX3NlbnRpbWVudCAlPiUgCiAgZmlsdGVyKHNlbnRpbWVudCA9PSAicG9zaXRpdmUiKSAlPiUgCiAgY291bnQoc29uZywgcmFuaywgdG90YWxfd29yZHMpICU+JSAKICB1bmdyb3VwKCkgJT4lIAogIG11dGF0ZShwZXJjZW50ID0gbiAvIHRvdGFsX3dvcmRzLCByYW5rID0gMTAgKiBmbG9vcihyYW5rIC8gMTApKSAlPiUgCiAgZ2dwbG90KGFlcyhhcy5mYWN0b3IocmFuayksIHBlcmNlbnQpKSArCiAgZ2VvbV9ib3hwbG90KCkKYGBgCgojIyBNb3JlIG9uIEJpbGxib2FyZCByYW5rIGFuZCBzZW50aW1lbnQgc2NvcmVzCgpJbiB0aGUgbGFzdCBleGVyY2lzZSwgeW91IGV4cGxvcmVkIGhvdyBwb3NpdGl2ZSBzZW50aW1lbnQgYW5kIEJpbGxib2FyZCByYW5rIGFyZSByZWxhdGVkIHVzaW5nIGEgdmlzdWFsaXphdGlvbiwgYW5kIHlvdSBmb3VuZCB0aGF0IHRoZXJlIHdhcyBubyB2aXNpYmxlIHRyZW5kLiBTb25ncyB3aXRoIG1vcmUgcG9zaXRpdmUgd29yZHMgZG8gbm90IHJlYWNoIGhpZ2hlciBvciBsb3dlciByYW5rcyBvbiB0aGUgQmlsbGJvYXJkIGNoYXJ0LiBOZXh0LCBjaGVjayB0aGUgc2FtZSByZWxhdGlvbnNoaXAgdXNpbmcgdGhlIHNhbWUgdmlzdWFsaXphdGlvbiBidXQgZm9yIG5lZ2F0aXZlIHdvcmRzLiBUaGUgYGx5cmljX3NlbnRpbWVudGAgZGF0YSBmcmFtZSB0aGF0IHlvdSBjcmVhdGVkIGVhcmxpZXIgaXMgc3RpbGwgYXZhaWxhYmxlIGluIHlvdXIgZW52aXJvbm1lbnQuCgojIyMjIEluc3RydWN0aW9ucwoqIEZpbHRlciBmb3Igb25seSBuZWdhdGl2ZSB3b3Jkcy4KKiBDb3VudCB1c2luZyB0aHJlZSBhcmd1bWVudHM6IGBzb25nYCwgQmlsbGJvYXJkIHJhbmssIGFuZCB0b3RhbCBudW1iZXIgb2Ygd29yZHMuCiogRGVmaW5lIGEgbmV3IHBlcmNlbnQgY29sdW1uIHdpdGggYG11dGF0ZSgpYCB0aGF0IGlzIGVxdWFsIHRvIGBuYCBkaXZpZGVkIGJ5IGB0b3RhbF93b3Jkc2AuCgpUaGVuIHVzZSBgZ2dwbG90MmAgdG8gbWFrZSB5b3VyIHZpc3VhbGl6YXRpb24uCgpgYGB7cn0KbHlyaWNfc2VudGltZW50ICU+JSAKICBmaWx0ZXIoc2VudGltZW50ID09ICJuZWdhdGl2ZSIpICU+JSAKICBjb3VudChzb25nLCByYW5rLCB0b3RhbF93b3JkcykgJT4lIAogIHVuZ3JvdXAoKSAlPiUgCiAgbXV0YXRlKHBlcmNlbnQgPSBuIC8gdG90YWxfd29yZHMsIHJhbmsgPSAxMCAqIGZsb29yKHJhbmsgLyAxMCkpICU+JQogIGFycmFuZ2UoZGVzYyhwZXJjZW50KSkgJT4lIAogIGdncGxvdChhZXMoeCA9IGFzLmZhY3RvcihyYW5rKSwgeSA9IHBlcmNlbnQpKSArCiAgZ2VvbV9ib3hwbG90KCkKICAKYGBgCgojIyBTZW50aW1lbnQgc2NvcmVzIGJ5IHllYXIKCllvdSBhcmUgZ29pbmcgdG8gbWFrZSB0d28gbW9yZSBleHBsb3JhdG9yeSBwbG90cyBpbiB0aGlzIGV4ZXJjaXNlLCBtdWNoIGxpa2UgdGhlIHBsb3RzIHlvdSBtYWRlIGZvciBCaWxsYm9hcmQgcmFuay4gVGhpcyB0aW1lLCB5b3UgYXJlIGdvaW5nIHRvIGV4cGxvcmUgaG93IHNlbnRpbWVudCBoYXMgYmVlbiBjaGFuZ2luZyB3aXRoIHRpbWUuIEFyZSBzb25ncyBvbiB0aGUgQmlsbGJvYXJkIGNoYXJ0IGNoYW5naW5nIGluIHRoZWlyIHVzZSBvZiBuZWdhdGl2ZSBvciBwb3NpdGl2ZSB3b3JkcyB0aHJvdWdoIHRoZSBkZWNhZGVzPwoKIyMjIyBJbnN0cnVjdGlvbnMKKiBGaWx0ZXIgZm9yIG9ubHkgbmVnYXRpdmUgd29yZHMuCiogVXNlIGBjb3VudCgpYCB3aXRoIHRocmVlIGFyZ3VtZW50cyB0byBmaW5kIHRoZSBudW1iZXIgb2Ygc2VudGltZW50IHdvcmRzIGZvciBlYWNoIHNvbmcsIHllYXIsIGFuZCB0b3RhbCBudW1iZXIgb2Ygd29yZHMuCiogVXNlIGBnZ3Bsb3QoKWAgdG8gc2V0IHVwIGEgcGxvdCB3aXRoIHllYXIgb24gdGhlIHgtYXhpcyAocmVtZW1iZXIgdG8gdHJlYXQgaXQgYXMgYSBmYWN0b3Igd2l0aCBgYXMuZmFjdG9yKHllYXIpYCkgYW5kIHBlcmNlbnQgb24gdGhlIHktYXhpcy4KCk5vdyByZXBlYXQgdGhlc2Ugc2FtZSBzdGVwcyBmb3IgcG9zaXRpdmUgd29yZHMuCgpgYGB7cn0KbHlyaWNfc2VudGltZW50ICU+JSAKICBmaWx0ZXIoc2VudGltZW50ID09ICJuZWdhdGl2ZSIpICU+JSAKICBjb3VudChzb25nLCB5ZWFyLCB0b3RhbF93b3JkcykgJT4lIAogIHVuZ3JvdXAoKSAlPiUgCiAgbXV0YXRlKHBlcmNlbnQgPSBuIC8gdG90YWxfd29yZHMsIHllYXIgPSAxMCAqIGZsb29yKHllYXIgLyAxMCkpICU+JSAKICBnZ3Bsb3QoYWVzKHggPSBhcy5mYWN0b3IoeWVhciksIHkgPSBwZXJjZW50KSkgKwogIGdlb21fYm94cGxvdCgpCgpseXJpY19zZW50aW1lbnQgJT4lIAogIGZpbHRlcihzZW50aW1lbnQgPT0gInBvc2l0aXZlIikgJT4lIAogIGNvdW50KHNvbmcsIHllYXIsIHRvdGFsX3dvcmRzKSAlPiUgCiAgdW5ncm91cCgpICU+JSAKICBtdXRhdGUocGVyY2VudCA9IG4gLyB0b3RhbF93b3JkcywgeWVhciA9IDEwICogZmxvb3IoeWVhciAvIDEwKSkgJT4lIAogIGdncGxvdChhZXMoeCA9IGFzLmZhY3Rvcih5ZWFyKSwgeSA9IHBlcmNlbnQpKSArCiAgZ2VvbV9ib3hwbG90KCkKYGBgCgojIyBNb2RlbGluZyBuZWdhdGl2ZSBzZW50aW1lbnQKCllvdSBzYXcgaW4geW91ciB2aXN1YWxpemF0aW9ucyBpbiB0aGUgbGFzdCBleGVyY2lzZSBob3cgcG9zaXRpdmUgYW5kIG5lZ2F0aXZlIHNlbnRpbWVudCBhcHBlYXIgdG8gYmUgcmVsYXRlZCB0byB5ZWFyLiBOb3csIHlvdSBjYW4gZXhwbG9yZSB0aGF0IHJlbGF0aW9uc2hpcCB3aXRoIGxpbmVhciBtb2RlbGluZy4gT25lIG1vcmUgdGltZSwgbWFrZSBhIGRhdGFmcmFtZSB3aXRoIG9uZSByb3cgcGVyIHNvbmcgdGhhdCBjb250YWlucyB0aGUgcHJvcG9ydGlvbiBvZiBuZWdhdGl2ZSB3b3Jkcy4gVGhlbiwgYnVpbGQgYSBsaW5lYXIgbW9kZWwgYW5kIHNlZSB3aGV0aGVyIHRoZSByZWxhdGlvbnNoaXAgaXMgc2lnbmlmaWNhbnQuIFRoZSBgbHlyaWNfc2VudGltZW50YCBkYXRhIGZyYW1lIHRoYXQgeW91IGNyZWF0ZWQgZWFybGllciBpcyBzdGlsbCBhdmFpbGFibGUgaW4geW91ciBlbnZpcm9ubWVudC4KCiMjIyMgSW5zdHJ1Y3Rpb25zCiogYEZpbHRlcmAgZm9yIG9ubHkgbmVnYXRpdmUgd29yZHMKKiBVc2UgYG11dGF0ZSgpYCB0byBkZWZpbmUgYSBuZXcgcGVyY2VudCBjb2x1bW4gdGhhdCBpcyBgbmAgZGl2aWRlZCBieSBgdG90YWxfd29yZHNgCiogV2hlbiBmaXR0aW5nIHRoZSBsaW5lYXIgbW9kZWwgd2l0aCBgbG0oKWAsIGBwZXJjZW50YCB3aWxsIGJlIHlvdXIgcmVzcG9uc2UgYW5kIGB5ZWFyYCB3aWxsIGJlIHlvdXIgcHJlZGljdG9yLgoqIFRvIHNlZSB0aGUgcmVzdWx0cyBvZiB5b3VyIG1vZGVsIGZpdHRpbmcsIGNhbGwgYHN1bW1hcnlgIG9uIHlvdXIgbW9kZWwgZml0IG9iamVjdAoKYGBge3J9Cm5lZ2F0aXZlX2J5X3llYXIgPC0gbHlyaWNfc2VudGltZW50ICU+JSAKICBmaWx0ZXIoc2VudGltZW50ID09ICJuZWdhdGl2ZSIpICU+JSAKICBjb3VudChzb25nLCB5ZWFyLCB0b3RhbF93b3JkcykgJT4lIAogIHVuZ3JvdXAoKSAlPiUgCiAgbXV0YXRlKHBlcmNlbnQgPSBuIC8gdG90YWxfd29yZHMpCgptb2RlbF9uZWdhdGl2ZSA8LSBsbShwZXJjZW50IH4geWVhciwgZGF0YSA9IG5lZ2F0aXZlX2J5X3llYXIpCgpzdW1tYXJ5KG1vZGVsX25lZ2F0aXZlKQpgYGAKCiMjIE1vZGVsaW5nIHBvc2l0aXZlIHNlbnRpbWVudAoKTm93IGl0J3MgdGltZSBmb3IgeW91IHRvIGJ1aWxkIGEgbGluZWFyIG1vZGVsIGZvciBwb3NpdGl2ZSBzZW50aW1lbnQgaW4gdGhpcyBkYXRhc2V0IG9mIHBvcCBzb25ncywganVzdCBsaWtlIHlvdSBkaWQgZm9yIG5lZ2F0aXZlIHNlbnRpbWVudCBpbiB0aGUgbGFzdCBleGVyY2lzZS4gVXNlIHRoZSBzYW1lIGFwcHJvYWNoIGFuZCBzZWUgd2hhdCB0aGUgcmVzdWx0cyBhcmUhCgojIyMjIEluc3RydWN0aW9ucwoqIGBDb3VudGAgdXNpbmcgdGhyZWUgYXJndW1lbnRzOiBgc29uZ2AsIGB5ZWFyYCwgYW5kIHRvdGFsIG51bWJlciBvZiB3b3Jkcy4KKiBVc2UgYG11dGF0ZSgpYCB0byBkZWZpbmUgYSBuZXcgYHBlcmNlbnRgIGNvbHVtbiB0aGF0IGlzIGBuYCBkaXZpZGVkIGJ5IGB0b3RhbF93b3Jkc2AKKiBTcGVjaWZ5IGEgbGluZWFyIG1vZGVsIHdpdGggYGxtKClgIGluIHRoZSBzYW1lIHdheSBhcyB0aGUgbGFzdCBleGVyY2lzZSwgYnV0IHdpdGggYGRhdGEgPSBwb3NpdGl2ZV9ieV95ZWFyYCB0aGlzIHRpbWUuCiogRXhwbG9yZSB0aGUgcmVzdWx0cyBvZiB0aGUgbW9kZWwgZml0dGluZyB3aXRoIGBzdW1tYXJ5KClgCgpgYGB7cn0KZGV2dG9vbHM6Omluc3RhbGxfZ2l0aHViKCJhYnJlc2xlci9nZGVsdHIyIikKYGBgCgo=</div>
 
 
 
